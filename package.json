@@ -1,0 +1,32 @@
+{
+  "name": "typescript-types-example",
+  "description": "TypeScript Types example",
+  "version": "0.0.0",
+  "author": "Sergey Nikitin <srg.post@gmail.com>",
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/n0th1ng-else/typescript-types-complex-example.git"
+  },
+  "bugs": {
+    "url": "https://github.com/n0th1ng-else/typescript-types-complex-example/issues"
+  },
+  "homepage": "https://github.com/n0th1ng-else/typescript-types-complex-example#readme",
+  "main": "dist/es/index.js",
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint",
+    "format": "prettier --write"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "4.8.2",
+    "@typescript-eslint/parser": "4.8.2",
+    "prettier": "2.2.0",
+    "typescript": "4.1.2"
+  }
+}
