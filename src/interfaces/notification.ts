@@ -1,14 +1,14 @@
 // interfaces/notification.ts
 
-import { ButtonType } from "../lists/button";
+import type { ButtonType } from "../lists/button";
 
-interface ButtonConfig {
+export interface NotificationButtonConfig {
   text?: string;
   type?: ButtonType;
 }
 
 export interface Notification {
-  info(text: string, buttons?: ButtonConfig[]): void;
-  warning(text: string, buttons?: ButtonConfig[]): void;
-  error(text: string, buttons?: ButtonConfig[]): void;
+  info(text: string, buttons?: NotificationButtonConfig[]): void;
+  warning(text: string, buttons?: NotificationButtonConfig[]): void;
+  error(text: string, buttons?: NotificationButtonConfig[]): void;
 }
