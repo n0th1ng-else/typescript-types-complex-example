@@ -1,7 +1,10 @@
 // namespaces/core.ts
 
-import { Notification } from "../interfaces/notification";
+import * as iNotification from "../interfaces/notification";
+import * as lButton from "../lists/button";
 
-export interface UiCore {
-  readonly notification: Notification;
+export namespace UiCore {
+  export import NotificationButtonConfig = iNotification.NotificationButtonConfig;
+
+  export import ButtonType = lButton.ButtonType;
 }

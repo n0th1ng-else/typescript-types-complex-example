@@ -1,7 +1,16 @@
 // index.ts
 
-import { UiCore } from "./namespaces/core";
+import { UiCore as _UiCore } from "./namespaces/core";
+import { UiLib } from "./interfaces/ui";
+
+export { _UiCore as UiCore };
 
 declare global {
-  let ui: UiCore;
+  namespace UiCore {
+    export type NotificationButtonConfig = _UiCore.NotificationButtonConfig;
+
+    export type ButtonType = _UiCore.ButtonType;
+  }
+
+  let ui: UiLib;
 }

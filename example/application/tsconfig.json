@@ -11,5 +11,7 @@
     "strict": true,
     "target": "es5"
   },
-  "exclude": ["./example"]
+  "files": ["../../dist/index.d.ts"],
+  "exclude": ["node_modules", "../../src/**/*"],
+  "include": ["moduleNoImport.ts", "moduleWithImport.ts", "moduleWithType.ts"]
 }
