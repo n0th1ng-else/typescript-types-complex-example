@@ -1,3 +1,5 @@
+// example/application/moduleWithType.ts
+
 import type { UiCore } from "../../dist";
 
 const showNotificationWithButton = (
