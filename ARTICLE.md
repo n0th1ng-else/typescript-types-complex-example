@@ -183,7 +183,29 @@ We now control how Typescript emits the output. We also specify a path to our ty
 
 Alright then we install the package in our project, and we can see it works!
 
------- WE ARE HERE -----------
+Now let's play with it. What if we want to pass some `ButtonConfig` variable as the parameter?
+We want to have a way to write something like this:
+
+```typescript
+// example/application/moduleWithImport.ts
+
+import { UiCore } from "ui-types-package";
+
+const showNotificationWithButton = (
+  buttonText: string,
+  buttonType: UiCore.ButtonType
+): void =>
+  ui.notification.info("You are lucky to see the button!", [
+    { text: buttonText, type: buttonType }
+  ]);
+```
+
+Note here and below `UiCore` is a namespace that contains all the enums, configs, interfaces out UI library operates with.
+I think it is a good idea to collect everything under so,e namespace so you would not think of naming for each interface.
+For instance, we have `Notification` interface, but it is too generic, in the meantime `UiCore.Notification` clearly describes
+where it comes from.
+
+We can't import `UiCore` from the library yet since we don't export anything. Let's improve our code and form the namespace:
 
 ```typescript
 // namespaces/core.ts
@@ -198,18 +220,22 @@ export namespace UiCore {
 }
 ```
 
-Now let's play with it. What if we want to pass some `ButtonConfig` variable as the parameter?
-We want to have a way to write something like this:
+We actually export all data we have under the namespace with specific syntax. And, since the main file in the package in `index.ts`,
+we pick a global export to expose the namespace into public:
 
 ```typescript
-import type { UiCore } from "ui-types-package";
+// index.ts
 
-const showNotificationWithButton = (
-  buttonText: string,
-  buttonType: UiCore.ButtonType
-): void =>
-  ui.notification.info("test", [{ text: buttonText, type: buttonType }]);
+import { UiLib } from "./interfaces/ui";
+
+export { UiCore } from "./namespaces/core"; // <<<-- We apply this export
+
+declare global {
+  let ui: UiLib;
+}
 ```
+
+------ WE ARE HERE -----------
 
 But hey, we did not export `ButtonConfig`! We are going to add an export statement:
 
@@ -225,9 +251,3 @@ const btnNo: UiCore.NotificationButtonConfig = {
 
 ui.notification.warning("Are you sure?", [btnYes, btnNo]);
 ```
-
-To do that, we need to import
-
-\
-
----
