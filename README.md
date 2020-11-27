@@ -1,4 +1,4 @@
-Enhance `tsconfig.json` to put type into action:
+Enhance `tsconfig.json` to put types into action:
 
 ```json
 {
@@ -10,3 +10,6 @@ Enhance `tsconfig.json` to put type into action:
   "include": ["YOUR_CUSTOM_TYPES.d.ts", "src/**/*"]
 }
 ```
+
+This is needed since we use some custom package directory. Only types from
+[@types](https://github.com/DefinitelyTyped/DefinitelyTyped) folder is being picked up automatically.
