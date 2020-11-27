@@ -10,21 +10,23 @@ analyzer will pick it up and will handle the package in a way you defined in typ
 is close to C/C++ declaration files. Here is a simple example:
 
 ```javascript
-// page.js
+// sample.js
+
 export const pageSize = 25;
 export const pageSizes = [25, 50, 100];
 export const getOffset = (page, pageSize) => page * pageSize;
 ```
 
 ```typescript
-// page.d.ts
+// sample.d.ts
+
 export const pageSize: number;
 export const pageSizes: number[];
 export const getOffset: (page: number, pageSize: number) => number;
 ```
 
 Note that Typescript operates definitions file over the Javascript module. Imagine you removed
-`export const pageSizes = [25, 50, 100];` from the `page.js` module. Typescript would still
+`export const pageSizes = [25, 50, 100];` from the `sample.js` module. Typescript would still
 think it exists, and you will get the error during the runtime. It is a known tradeoff to keep
 definition files in sync with real Javascript code. And this approach allowed Typescript code base
 to raise gradually without having to rewrite all Javascript.
@@ -127,10 +129,12 @@ Then we let's take a look on the simple case. We don't import anything, as the U
 the global variable, and we want to call a notification:
 
 ```typescript
+// example/application/moduleNoImport.ts
+
 ui.notification.info("Document has been saved!");
 ```
 
-What we need to do to make it available? We add the `ui` variable into global namespace:
+What we need to do to make it available? We are going to enrich the **global** namespace with the `ui` variable:
 
 ```typescript
 // index.ts
@@ -142,7 +146,44 @@ declare global {
 }
 ```
 
-Where `UiLib` defines a number of methods the notifications support:
+`UiLib` here describes everything our UI library exposes into this global object. In our example, we have a list of  
+methods that show different kinds of notifications:
+
+```typescript
+// interfaces/ui.ts
+
+import { Notification } from "./notification";
+
+export interface UiLib {
+  notification: Notification;
+}
+```
+
+This's almost it. As the last thing we set up package properly. We tell Typescript to emit type declarations by
+tweaking the `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "declaration": true,
+    "declarationDir": "dist/",
+    "outDir": "dist/es"
+  }
+}
+```
+
+We now control how Typescript emits the output. We also specify a path to our types in `package.json`:
+
+```json
+{
+  "main": "dist/es/index.js",
+  "types": "dist/index.d.ts"
+}
+```
+
+Alright then we install the package in our project, and we can see it works!
+
+------ WE ARE HERE -----------
 
 ```typescript
 // namespaces/core.ts
@@ -156,19 +197,6 @@ export namespace UiCore {
   export import ButtonType = lButton.ButtonType;
 }
 ```
-
-We also specify a path to our types in `package.json`:
-
-```json
-{
-  "...": "somewhere in package.json we specify types module",
-
-  "main": "dist/es/index.js",
-  "types": "dist/index.d.ts"
-}
-```
-
-Alright then we install the package in our project, and we can see it works!
 
 Now let's play with it. What if we want to pass some `ButtonConfig` variable as the parameter?
 We want to have a way to write something like this:
