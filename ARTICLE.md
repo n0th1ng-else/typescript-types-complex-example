@@ -191,21 +191,18 @@ We want to have a way to write something like this:
 
 import { UiCore } from "ui-types-package";
 
-const showNotificationWithButton = (
-  buttonText: string,
-  buttonType: UiCore.ButtonType
-): void =>
-  ui.notification.info("You are lucky to see the button!", [
-    { text: buttonText, type: buttonType }
+const showNotificationWithButton = (message: string): void =>
+  ui.notification.info(message, [
+    { text: "OK", type: UiCore.ButtonType.Primary }
   ]);
 ```
 
 Note here and below `UiCore` is a namespace that contains all the enums, configs, interfaces out UI library operates with.
-I think it is a good idea to collect everything under so,e namespace so you would not think of naming for each interface.
+I think it is a good idea to collect everything under some namespace, so you would not think of naming for each interface.
 For instance, we have `Notification` interface, but it is too generic, in the meantime `UiCore.Notification` clearly describes
 where it comes from.
 
-We can't import `UiCore` from the library yet since we don't export anything. Let's improve our code and form the namespace:
+Right now we can't import `UiCore` from the library yet since we don't export anything. Let's improve our code and form the namespace:
 
 ```typescript
 // namespaces/core.ts
@@ -220,7 +217,7 @@ export namespace UiCore {
 }
 ```
 
-We actually export all data we have under the namespace with specific syntax. And, since the main file in the package in `index.ts`,
+We basically export all data we have under the namespace with specific syntax. And, since the main file in the package is `index.ts`,
 we pick a global export to expose the namespace into public:
 
 ```typescript
@@ -235,19 +232,43 @@ declare global {
 }
 ```
 
------- WE ARE HERE -----------
-
-But hey, we did not export `ButtonConfig`! We are going to add an export statement:
+This is that simple! Now we can import some enum and enjoy writing the code. OR. Or we can think of some other use case!
+In the example above, we used `ButtonType` enum value to create some notification with pre-defined button type. What if we
+want to use `ButtonType` as a parameter type? We are not going to use some particular value, so we expect to access
+`UiCore.ButtonType` without having to import something. Currently, this does not work, as we dont have `UiCore` in the
+`global` namespace. Then let's add it:
 
 ```typescript
-const btnYes: UiCore.NotificationButtonConfig = {
-  text: "Yes",
-  type: UiCore.ButtonType.Primary
-};
-const btnNo: UiCore.NotificationButtonConfig = {
-  text: "Cancel",
-  type: UiCore.ButtonType.Secondary
-};
+// index.ts
 
-ui.notification.warning("Are you sure?", [btnYes, btnNo]);
+import { UiCore as _UiCore } from "./namespaces/core";
+import { UiLib } from "./interfaces/ui";
+
+export { _UiCore as UiCore };
+
+declare global {
+  namespace UiCore {
+    export type NotificationButtonConfig = _UiCore.NotificationButtonConfig;
+
+    export type ButtonType = _UiCore.ButtonType;
+  }
+
+  let ui: UiLib;
+}
 ```
+
+We first rename the `UiCore` import as we want to avoid namespace name conflict. We re-export `UiCore` under the correct
+name is it was done previously. Finally, we copy `UiCore` namespace under the global scope. Both `UiCore` and global
+`UiCore` export the same data. The only thing I want to draw your attention to is the way how we write export statements:
+
+```typescript
+// UiCore for import
+export import ButtonType = lButton.ButtonType;
+
+// UiCore under the global scope
+export type ButtonType = _UiCore.ButtonType;
+```
+
+You can see the global namespace uses [type alias](https://www.typescriptlang.org/docs/handbook/advanced-types.html#type-aliases)
+approach to export data. For import, we actually want to have enum values accessible, so we can't use the
+same syntax there. Instead, we
