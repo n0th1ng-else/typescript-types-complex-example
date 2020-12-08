@@ -271,4 +271,12 @@ export type ButtonType = _UiCore.ButtonType;
 
 You can see the global namespace uses [type alias](https://www.typescriptlang.org/docs/handbook/advanced-types.html#type-aliases)
 approach to export data. For import, we actually want to have enum values accessible, so we can't use the
-same syntax there. Instead, we
+same syntax there. Instead, we import values and re-export them under the namespace block. Thus, we collect all the models,
+enums, interfaces under some common name, we can name it whatever we want, and it will be a single entrypoint for all
+our UI library-related data.
+
+This part is a tradeoff to have all usage cases working. it adds some copy-paste routine, but then it is a comfortable
+way to provide developers with type definitions: We can use global variable exposed by the UI library, we can use any
+related type to define other variables and functions without having to import `UiCore` for no reason. Then we can
+import it and use types the same way we did before along with enum values and other constants. And for sure we do support
+`import type { UiCore } from "ui-types-package"` syntax last Typescript version provide to define types.
