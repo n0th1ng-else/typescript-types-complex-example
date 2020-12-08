@@ -1,13 +1,12 @@
 ### Types For A JS Library. Hard Way
 
-The first public version of Typescript appeared # years ago and now it slowly becomes a standard
-in Javascript development. Here in 2020 you can find out more and more companies select Typescript
-to write new applications and services. There are always pros and cons on this decision. One
-disadvantage is that many npm packages are still Javascript modules and thus, Typescript can't
-help you to write safe code. Fortunately, Typescript supports one feature that made it so popular
-in the beginning. You can declare type definitions for particular Javascript module. Typescript
-analyzer will pick it up and will handle the package in a way you defined in types file. The concept
-is close to C/C++ declaration files. Here is a simple example:
+The first public version of Typescript appeared 8 years ago and now it slowly becomes a standard in Javascript
+development. Here in 2021, you can find out more and more companies select Typescript to develop new applications
+and services. There are always pros and cons to this decision. One disadvantage is that many npm packages are still
+Javascript modules and thus, Typescript can't help you to write safe code. Fortunately, Typescript supports one feature
+that made it so popular in the beginning. You can declare type definitions for a particular Javascript module. The
+Typescript analyzer will pick it up and will handle the package in a way you defined in the types file. The concept is
+close to C/C++ declaration files. Here is a simple example:
 
 ```javascript
 // sample.js
@@ -26,26 +25,26 @@ export const getOffset: (page: number, pageSize: number) => number;
 ```
 
 Note that Typescript operates definitions file over the Javascript module. Imagine you removed
-`export const pageSizes = [25, 50, 100];` from the `sample.js` module. Typescript would still
-think it exists, and you will get the error during the runtime. It is a known tradeoff to keep
-definition files in sync with real Javascript code. And this approach allowed Typescript code base
-to raise gradually without having to rewrite all Javascript.
+`export const pageSizes = [25, 50, 100];` from the `sample.js` module. Typescript would still think it exists, and you
+will get the error during the runtime. It is a known tradeoff to keep definition files in sync with real Javascript
+code. Teams try to update type definitions as soon as possible to provide a smooth experience for other developers.
+In the meantime, this approach allowed the Typescript code base to raise gradually without having to rewrite all
+Javascript.
 
-There are many examples on how to write type definitions. Most of the time you will meet simple
-cases and thus would be able to find something similar in >DefinitelyTyped< repository, where
-developers store definitions for npm packages. In our company, we faced some tricky case. We
-develop UI components framework-independent library. We use it in our products from the beginning.
-You can imagine how much effort needs to be made to rewrite such a big thing. In the meantime,
-we write new features using the Typescript. The problem is, every time one of the teams goes to
-implement a new code, they write a small part of the UI library definitions. Well, this does not
-look like a good process, and we decided to have a separate package with whole type definitions
-for our library. This will allow us to install it as a regular node package when it is needed, and
-we would not spend time on writing the same things again and again. Though we have some good
-documentation resource for the UI library, having type definitions makes it easier to write the
-code and refactor when something changes in UI components interfaces.
+There are many examples of how to write type definitions. Most of the time you will meet simple cases and thus would be
+able to find something similar in [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped) repository,
+where developers store definitions for npm packages. In our company, we faced some tricky cases. We develop UI
+components framework-independent library. We use it in our products from the beginning. You can imagine how much effort
+needs to be made to rewrite such a big thing. In the meantime, we write new features using the Typescript language. The
+problem is, every time one of the teams goes to implement a new code, they write a small part of the UI library
+definitions. Well, this does not look like a good process, and we decided to have a separate package with whole type
+definitions for our library. This will allow us to install it as a regular node package when it is needed, and we would
+not spend time writing the same things again and again. Though we have some good documentation resource for the UI
+library, having type definitions makes it easier to write the code and refactor when something changes in UI components
+interfaces.
 
 Now you may ask me, what is wrong this our UI library? The thing is that we inject some global
-variable to interact with UI, and it can be easily defined in type definitions file.
+variable to interact with UI, and it can be easily defined in the type definitions file.
 
 ```typescript
 // index.d.ts
@@ -58,8 +57,7 @@ declare global {
 
 (UiLib here is an interface that describes all UI library API we can use)
 
-Then imagine you have a notification window with a button. THe button can be the one of three
-types:
+Then imagine you have a notification window with a button. The button can be one of three types:
 
 ```typescript
 // lists/button.ts
