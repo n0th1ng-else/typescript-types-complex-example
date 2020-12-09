@@ -43,8 +43,8 @@ not spend time writing the same things again and again. Though we have some good
 library, having type definitions makes it easier to write the code and refactor when something changes in UI components
 interfaces.
 
-Now you may ask me, what is wrong this our UI library? The thing is that we inject some global
-variable to interact with UI, and it can be easily defined in the type definitions file.
+Now you may ask me, what is wrong with our UI library? The thing is that we inject some global variable to interact
+with the exposed API, and it can be easily defined in the type definitions file.
 
 ```typescript
 // index.d.ts
@@ -69,42 +69,24 @@ export enum ButtonType {
 }
 ```
 
-We wan to import lists like this and use them in our applications. So
-this becomes not just a type definitions library, but real package! And
-this is interesting - how can we combine the best of two worlds? Let's
-write down what we want to have in the end:
+We want to import lists like this one and use them in our applications. So this becomes not just a type definitions
+library, but a real package! And this is interesting - how can we combine the best of two worlds? Let's write down
+what we want to have in the end:
 
-1. We want our UI components definitions to be available without having
-   to import anything.
-2. We want to use pre-defined constants and lists for UI components by
-   importing them from our types package. Type definition are still being
-   applied.
+1. We want our UI components definitions to be available without having to import anything.
+2. We want to use predefined constants and lists for UI components by importing them from our types package. There
+   should not be any conflict to assign some type from the library in this case as well.
 
-Sounds like a small deal, right? Let's write `.d.ts` file with
-definitions and... Oh, wait, you can't put real code (constants,
-enumerable lists etc) in the `.d.ts` file! Sounds reasonable. Let's
-create a regular `.ts` file and pur all these enums there. Then we...
-well, how can we apply globals in `.ts` file?! Meh...
+Sounds like a small deal, right? Let's write `.d.ts` file with definitions and... Oh, wait, you can't put real code
+(constants, enumerable lists, and other stuff) in the `.d.ts` file! Sounds reasonable. Let's create a regular `.ts`
+file and put all these enums there. Then we... well, how can we apply globals in `.ts` file?! Meh...
 
-We did not find an example on how to do that, really. StackOverflow
-is flooded by the `.d.ts vs .ts` concept war. We had nothing but
-digging into Typescript documentation and finally got the code that
-meets our requirements.
+We did not find an example on how to do that, really. StackOverflow is flooded by the `.d.ts vs .ts` concept war. We
+had nothing but digging into Typescript documentation and finally got the code that meets our requirements.
 
-First things first. We write interfaces and enums as usual. I am going
-to provide code examples in a simplified matter, so we would focus
-on the approach, not the particular code features. Imagine we have
-a notification dialog, so we write code like this:
-
-```typescript
-// lists/button.ts
-
-export enum ButtonType {
-  Primary = "ui-primary",
-  Secondary = "ui-secondary",
-  Danger = "ui-danger"
-}
-```
+First things first. We write interfaces and enums as usual. I am going to provide code examples in a simplified matter,
+so we would focus on the approach, not the particular code features. Imagine we have a notification dialog, so we
+write code like this:
 
 ```typescript
 // interfaces/notification.ts
@@ -123,8 +105,24 @@ export interface Notification {
 }
 ```
 
-Then we let's take a look on the simple case. We don't import anything, as the UI components expose
-the global variable, and we want to call a notification:
+(simple notification API allows to assign a text message and buttons)
+
+Where `ButtonType` is the values in the enum:
+
+```typescript
+// lists/button.ts
+
+export enum ButtonType {
+  Primary = "ui-primary",
+  Secondary = "ui-secondary",
+  Danger = "ui-danger"
+}
+```
+
+(imagine we highlight a button according to the type)
+
+Then we let's take a look at the simple case. We don't import anything, as the UI components expose the global
+variable, and we want to call a notification:
 
 ```typescript
 // example/application/moduleNoImport.ts
@@ -132,7 +130,7 @@ the global variable, and we want to call a notification:
 ui.notification.info("Document has been saved!");
 ```
 
-What we need to do to make it available? We are going to enrich the **global** namespace with the `ui` variable:
+What do we need to do to make it available? We are going to enrich the **global** namespace with the `ui` variable:
 
 ```typescript
 // index.ts
@@ -144,7 +142,7 @@ declare global {
 }
 ```
 
-`UiLib` here describes everything our UI library exposes into this global object. In our example, we have a list of  
+`UiLib` here describes everything our UI library exposes into the global scope. In our example, we have a list of
 methods that show different kinds of notifications:
 
 ```typescript
@@ -157,8 +155,8 @@ export interface UiLib {
 }
 ```
 
-This's almost it. As the last thing we set up package properly. We tell Typescript to emit type declarations by
-tweaking the `tsconfig.json`:
+This's almost it. As the last thing, we adjust the package configuration. We tell Typescript to emit type declarations
+by tweaking the `tsconfig.json`:
 
 ```json
 {
@@ -195,28 +193,29 @@ const showNotificationWithButton = (message: string): void =>
   ]);
 ```
 
-Note here and below `UiCore` is a namespace that contains all the enums, configs, interfaces out UI library operates with.
-I think it is a good idea to collect everything under some namespace, so you would not think of naming for each interface.
-For instance, we have `Notification` interface, but it is too generic, in the meantime `UiCore.Notification` clearly describes
-where it comes from.
+Note here and below `UiCore` is a namespace that contains all the enums, configs, interfaces our UI library operates
+with. I believe it is a good idea to collect everything under some namespace, so you would not think of names for each
+interface. For instance, we have the `Notification` interface, but it is too generic, in the meantime
+`UiCore.Notification` clearly describes where it comes from.
 
-Right now we can't import `UiCore` from the library yet since we don't export anything. Let's improve our code and form the namespace:
+Right now we can't import `UiCore` from the library yet since we don't export anything. Let's improve our code and
+form the namespace:
 
 ```typescript
 // namespaces/core.ts
 
-import * as iNotification from "../interfaces/notification";
-import * as lButton from "../lists/button";
+import * as notificationInterfaces from "../interfaces/notification";
+import * as buttonLists from "../lists/button";
 
 export namespace UiCore {
-  export import NotificationButtonConfig = iNotification.NotificationButtonConfig;
+  export import NotificationButtonConfig = notificationInterfaces.NotificationButtonConfig;
 
-  export import ButtonType = lButton.ButtonType;
+  export import ButtonType = buttonLists.ButtonType;
 }
 ```
 
-We basically export all data we have under the namespace with specific syntax. And, since the main file in the package is `index.ts`,
-we pick a global export to expose the namespace into public:
+We basically export all data we have under the namespace with specific syntax. And, since the main file in the package
+is `index.ts`, we write a global export to expose the namespace into public:
 
 ```typescript
 // index.ts
@@ -230,11 +229,11 @@ declare global {
 }
 ```
 
-This is that simple! Now we can import some enum and enjoy writing the code. OR. Or we can think of some other use case!
-In the example above, we used `ButtonType` enum value to create some notification with pre-defined button type. What if we
-want to use `ButtonType` as a parameter type? We are not going to use some particular value, so we expect to access
-`UiCore.ButtonType` without having to import something. Currently, this does not work, as we dont have `UiCore` in the
-`global` namespace. Then let's add it:
+This is that simple! Now we can import some enum and enjoy writing the code. OR. Or we can think of some other use
+case! In the example above, we used the `ButtonType` enum value to create a notification with some pre-defined button
+type. What if we want to use `ButtonType` as a parameter type? We are not going to use some particular value, so we
+expect to access `UiCore.ButtonType` without having to import something. Currently, this does not work, as we don't
+have `UiCore` in the `global` namespace. Then let's add it:
 
 ```typescript
 // index.ts
@@ -255,9 +254,10 @@ declare global {
 }
 ```
 
-We first rename the `UiCore` import as we want to avoid namespace name conflict. We re-export `UiCore` under the correct
-name is it was done previously. Finally, we copy `UiCore` namespace under the global scope. Both `UiCore` and global
-`UiCore` export the same data. The only thing I want to draw your attention to is the way how we write export statements:
+We first rename the `UiCore` import as we want to avoid namespace name conflict. Then we re-export `UiCore` under the
+correct name as it was done previously. Finally, we copy the `UiCore` namespace under the global scope. Both `UiCore`
+and global `UiCore` export the same data. The only thing I want to draw your attention to is the way how we write
+export statements:
 
 ```typescript
 // UiCore for import
@@ -267,14 +267,15 @@ export import ButtonType = lButton.ButtonType;
 export type ButtonType = _UiCore.ButtonType;
 ```
 
-You can see the global namespace uses [type alias](https://www.typescriptlang.org/docs/handbook/advanced-types.html#type-aliases)
-approach to export data. For import, we actually want to have enum values accessible, so we can't use the
-same syntax there. Instead, we import values and re-export them under the namespace block. Thus, we collect all the models,
-enums, interfaces under some common name, we can name it whatever we want, and it will be a single entrypoint for all
-our UI library-related data.
+You can see the global namespace uses
+[type alias](https://www.typescriptlang.org/docs/handbook/advanced-types.html#type-aliases) approach to define objects.
+For import, we actually want to have enum values accessible, so we can't use the same syntax there. Instead, we import
+values and re-export them under the namespace block. Thus, we collect all the constants, models, enums, interfaces
+under some common name, we can name it whatever we want, and it will be a single entry point for all our UI
+library-related data.
 
 This part is a tradeoff to have all usage cases working. it adds some copy-paste routine, but then it is a comfortable
 way to provide developers with type definitions: We can use global variable exposed by the UI library, we can use any
 related type to define other variables and functions without having to import `UiCore` for no reason. Then we can
-import it and use types the same way we did before along with enum values and other constants. And for sure we do support
-`import type { UiCore } from "ui-types-package"` syntax last Typescript version provide to define types.
+import it and use types the same way we did before along with enum values and other constants. And for sure we do
+support `import type { UiCore } from "ui-types-package"` syntax last Typescript version provide to define types.
