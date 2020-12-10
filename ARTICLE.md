@@ -106,7 +106,6 @@ import type { ButtonType } from "../lists/button";
 export interface NotificationButtonConfig {
   text?: string;
   type?: ButtonType;
-  onClick?: () => void;
 }
 
 export interface Notification {

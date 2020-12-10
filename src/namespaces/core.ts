@@ -1,10 +1,10 @@
 // namespaces/core.ts
 
-import * as iNotification from "../interfaces/notification";
-import * as lButton from "../lists/button";
+import * as notificationInterfaces from "../interfaces/notification";
+import * as buttonLists from "../lists/button";
 
 export namespace UiCore {
-  export import NotificationButtonConfig = iNotification.NotificationButtonConfig;
+  export import NotificationButtonConfig = notificationInterfaces.NotificationButtonConfig;
 
-  export import ButtonType = lButton.ButtonType;
+  export import ButtonType = buttonLists.ButtonType;
 }
