@@ -200,28 +200,31 @@ We now control how Typescript emits the output. We also specify a path to our ty
 
 Alright then we install the package in our project, and we can see it works!
 
-### TODO
+### What About Values?
 
-Now let's play with it. What if we want to pass some `ButtonConfig` variable as the parameter?
-We want to have a way to write something like this:
+Now let's go deeper. What if we want to create a notification with some specific button? We want to be able to write
+something similar to this example:
 
 ```typescript
 // example/application/moduleWithImport.ts
 
 import { UiCore } from "ui-types-package";
 
-const showNotificationWithButton = (message: string): void =>
+const showNotification = (message: string): void =>
   ui.notification.info(message, [
     { text: "OK", type: UiCore.ButtonType.Primary }
   ]);
 ```
 
-Note here and below `UiCore` is a namespace that contains all the enums, configs, interfaces our UI library operates
-with. I believe it is a good idea to collect everything under some namespace, so you would not think of names for each
-interface. For instance, we have the `Notification` interface, but it is too generic, in the meantime
-`UiCore.Notification` clearly describes where it comes from.
+(we want to show notifications with the only button OK of Primary type)
 
-Right now we can't import `UiCore` from the library yet since we don't export anything. Let's improve our code and
+Note here and below **UiCore** is a namespace that contains all the enums, configs, interfaces our UI library operates
+with. I believe it is a good idea to collect everything under some namespace, so you would not think of names for each
+interface. For instance, we have the `Notification` interface. It sounds quite abstract, and it takes a while to
+understand we exact object behind the naming. In the meantime `UiCore.Notification` clearly describes where it comes
+from. Having a namespace is just an optional but convenient way to handle such things.
+
+Right now we can't import `UiCore` from the library as we don't export anything. Let's improve our code and
 form the namespace:
 
 ```typescript
@@ -237,26 +240,49 @@ export namespace UiCore {
 }
 ```
 
-We basically export all data we have under the namespace with specific syntax. And, since the main file in the package
-is `index.ts`, we write a global export to expose the namespace into public:
+(we use composite export to create an alias for objects under the namespace)
+
+We basically export all data we have under the namespace with `export import` alias syntax. And, since the main package
+module is `index.ts` in the root, we write a global export to expose the namespace into public:
 
 ```typescript
 // index.ts
 
 import { UiLib } from "./interfaces/ui";
 
-export { UiCore } from "./namespaces/core"; // <<<-- We apply this export
+export { UiCore } from "./namespaces/core";
 
 declare global {
   let ui: UiLib;
 }
 ```
 
-This is that simple! Now we can import some enum and enjoy writing the code. OR. Or we can think of some other use
-case! In the example above, we used the `ButtonType` enum value to create a notification with some pre-defined button
-type. What if we want to use `ButtonType` as a parameter type? We are not going to use some particular value, so we
-expect to access `UiCore.ButtonType` without having to import something. Currently, this does not work, as we don't
-have `UiCore` in the `global` namespace. Then let's add it:
+(we export UiCore and now it is available outside)
+
+Two simple steps to achieve our goal! Now we can import some enum and enjoy writing the code. OR. Or we can think of
+some other use case. In the example above, we used the `ButtonType.Primary` value to create a notification with some
+pre-defined button. But what if we want to use `ButtonType` as a parameter type?
+
+### Make Types Great Again
+
+We are not going to use some particular value, so we expect to access `UiCore.ButtonType` without having to import
+anything. Currently, this does not work, as we don't have `UiCore` in the `global` namespace. For example below
+does not work:
+
+```typescript
+// example/application/moduleWithType.ts
+
+const showNotificationWithButton = (
+  buttonText: string,
+  buttonType: UiCore.ButtonType
+): void =>
+  ui.notification.info("test", [{ text: buttonText, type: buttonType }]);
+```
+
+(TS2503: Cannot find namespace 'UiCore')
+
+// TODO
+Then let's add it:
 
 ```typescript
 // index.ts
