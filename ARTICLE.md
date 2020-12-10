@@ -281,8 +281,9 @@ const showNotificationWithButton = (
 
 (TS2503: Cannot find namespace 'UiCore')
 
-// TODO
-Then let's add it:
+Obviously, we are going to add the namespace in the `global` scope. Unfortunatelly we can't just use the namespace we
+created earlier, we neeed to define a new one. But, instead of importing everything again, we can use our existing
+namespace to clone data in form of types:
 
 ```typescript
 // index.ts
@@ -303,28 +304,32 @@ declare global {
 }
 ```
 
-We first rename the `UiCore` import as we want to avoid namespace name conflict. Then we re-export `UiCore` under the
-correct name as it was done previously. Finally, we copy the `UiCore` namespace under the global scope. Both `UiCore`
-and global `UiCore` export the same data. The only thing I want to draw your attention to is the way how we write
-export statements:
+(we create types from th existing namespace using the type alias syntax)
+
+We first rename the `UiCore` import as we want to avoid name conflict. Then we re-export `UiCore` under the
+correct name as it was done previously. Finally, we copy the `UiCore` namespace items under the global scope. Both
+namespaces (`UiCore` and global `UiCore`) export the same data. The only thing I want to draw your attention to is the
+way how we write export statements:
 
 ```typescript
-// UiCore for import
-export import ButtonType = lButton.ButtonType;
-
 // UiCore under the global scope
-export type ButtonType = _UiCore.ButtonType;
+export type ButtonType = buttonLists.ButtonType;
+
+// UiCore that can be used as a value
+export import ButtonType = lButton.ButtonType;
 ```
 
+(different syntax for different cases)
+
 You can see the global namespace uses
-[type alias](https://www.typescriptlang.org/docs/handbook/advanced-types.html#type-aliases) approach to define objects.
-For import, we actually want to have enum values accessible, so we can't use the same syntax there. Instead, we import
-values and re-export them under the namespace block. Thus, we collect all the constants, models, enums, interfaces
-under some common name, we can name it whatever we want, and it will be a single entry point for all our UI
-library-related data.
+[type alias](https://www.typescriptlang.org/docs/handbook/advanced-types.html#type-aliases) syntax to define objects.
+For import, we actually want to have values accessible, so we can't use the same approach there. Instead, we import
+values and re-export them under the namespace using the composite `export import` operator. Thus, we collect all the
+constants, models, enums, interfaces under some common name, we can name it whatever we want, and it will be a single
+entry point for all our UI library-related data.
 
 This part is a tradeoff to have all usage cases working. it adds some copy-paste routine, but then it is a comfortable
-way to provide developers with type definitions: We can use global variable exposed by the UI library, we can use any
+way to supply developers with type definitions: We can use global variable exposed by the UI library, we can use any
 related type to define other variables and functions without having to import `UiCore` for no reason. Then we can
 import it and use types the same way we did before along with enum values and other constants. And for sure we do
-support `import type { UiCore } from "ui-types-package"` syntax last Typescript version provide to define types.
+support new `import type { UiCore } from "ui-types-package"` syntax last Typescript versions provide to define types.
