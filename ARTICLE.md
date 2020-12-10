@@ -333,3 +333,14 @@ way to supply developers with type definitions: We can use global variable expos
 related type to define other variables and functions without having to import `UiCore` for no reason. Then we can
 import it and use types the same way we did before along with enum values and other constants. And for sure we do
 support new `import type { UiCore } from "ui-types-package"` syntax last Typescript versions provide to define types.
+
+### Conclusion
+
+In this article, I tried to show how we can create a package with type definitions. Taking into account thousands of
+examples for existing Javascript libraries, my research covers some rare edge case, when the package should behave
+the same way as a global type and while importing some value. The idea is to have two namespaces, first namespace
+contains all available objects, and the second namespace for types as part of the global scope.
+
+The name `UiCore`, the package `ui-types-package` and all objects in the article are placeholders to show the
+approach. You can use whatever names you want for your own libraries and follow the idea described here.
+Complete code example is located [here](https://github.com/n0th1ng-else/typescript-types-complex-example).
