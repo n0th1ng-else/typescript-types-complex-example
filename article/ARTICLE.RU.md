@@ -1,3 +1,5 @@
+// TODO
+
 ### Types For A JS Library. Hard Way
 
 The first public version of Typescript appeared 8 years ago and now it slowly becomes a standard in Javascript
