@@ -20,7 +20,7 @@ export const pageSizes = [25, 50, 100];
 export const getOffset = (page, pageSize) => page * pageSize;
 ```
 
-(yes, it is pretty straightforward `sample.js` module)
+(yes, it is a pretty straightforward `sample.js` module)
 
 Then we can spend a few seconds to write type definitions for the module:
 
@@ -36,7 +36,7 @@ export const getOffset: (page: number, pageSize: number) => number;
 
 Note that Typescript operates definitions file over the Javascript module. Imagine you removed
 `export const pageSizes = [25, 50, 100]` from the `sample.js` module. Typescript would still think it exists, and you
-will get runtime error in the browser. It is a known tradeoff to keep definition files in sync with real Javascript
+will get a runtime error in the browser. It is a known tradeoff to keep definition files in sync with real Javascript
 code. Teams try to update type definitions as soon as possible to provide a smooth experience for other developers.
 In the meantime, this approach allowed the Typescript code base to raise gradually without having to rewrite all
 Javascript.
@@ -50,7 +50,7 @@ this article.
 
 ### The Thing
 
-In our company, we develop internal UI components library. We use it in our products from the beginning. You can
+In our company, we develop an internal UI components library. We use it in our products from the beginning. You can
 imagine how much effort it would take to rewrite such a big thing. In the meantime, we write new features using the
 Typescript language. The problem is, every time one team goes to implement a new code, they write a small part of the
 UI library definitions. Well, this does not look like a good process, and we decided to have a separate package with
@@ -62,7 +62,7 @@ changes in UI components API.
 ### The Problem
 
 Now you may ask me, what is wrong with our UI library? The thing is that we inject some global variable to interact
-with the exposed API. In the meantime, we want to import some constant pre-defined values use them in our applications.
+with the exposed API. In the meantime, we want to import some constant pre-defined values to use them in our products.
 For example, we can style a button with one of the types:
 
 ```typescript
@@ -75,9 +75,9 @@ export enum ButtonType {
 }
 ```
 
-(depending on the value, the button will be rendered in specific color palette)
+(depending on the value, the button will be rendered in a specific color palette)
 
-So this project becomes not just a type definitions for the UI library, but a real package! And this is interesting -
+So this project becomes not just type definitions for the UI library, but a real package! And this is interesting -
 how can we combine the best of two worlds? Let's write down what we want to achieve in the end:
 
 1. We want the global variable `ui` to be accessible without having to import anything.
@@ -85,9 +85,9 @@ how can we combine the best of two worlds? Let's write down what we want to achi
 3. We want to use predefined constants and objects for UI components by importing them from our types package. There
    should not be any conflict to assign some type from the library in this case as well.
 
-Sounds like a small deal, right? Let's write `.d.ts` file with definitions and... Oh, wait, you can't put real code
-(constants, enumerable lists, and other stuff) in the `.d.ts` file! Sounds reasonable. Let's create a regular `.ts`
-file and put all these enums there. Then we... well, how can we apply globals in `.ts` file?! Meh...
+Sounds like a small deal, right? Let's write some `.d.ts` file with definitions and... Oh, wait, you can't put real
+code (constants, enumerable lists, and other stuff) in the `.d.ts` file! Sounds reasonable. Let's create a regular
+`.ts` file and put all these enums there. Then we... well, how can we apply globals in the `.ts` file?! Meh...
 
 We **did not find** an example on how to do that, really. StackOverflow is flooded by the `.d.ts vs .ts` concept war. We
 had nothing but digging into Typescript documentation and finally got the code that meets our requirements.
@@ -219,7 +219,7 @@ const showNotification = (message: string): void =>
 
 Note here and below **UiCore** is a namespace that contains all the enums, configs, interfaces our UI library operates
 with. I believe it is a good idea to collect everything under some namespace, so you would not think of names for each
-interface. For instance, we have the `Notification` interface. It sounds quite abstract, and it takes a while to
+interface. For instance, we have a `Notification` interface. It sounds quite abstract, and it takes a while to
 understand we exact object behind the naming. In the meantime `UiCore.Notification` clearly describes where it comes
 from. Having a namespace is just an optional but convenient way to handle such things.
 
@@ -242,7 +242,7 @@ export namespace UiCore {
 (we use composite export to create an alias for objects under the namespace)
 
 We basically export all data we have under the namespace with `export import` alias syntax. And, since the main package
-module is `index.ts` in the root, we write a global export to expose the namespace into public:
+module is `index.ts` in the root, we write a global export to expose the namespace into the public:
 
 ```typescript
 // index.ts
@@ -265,8 +265,8 @@ pre-defined button. But what if we want to use `ButtonType` as a parameter type?
 ### Make Types Great Again
 
 We are not going to use some particular value, so we expect to access `UiCore.ButtonType` without having to import
-anything. Currently, this does not work, as we don't have `UiCore` in the `global` namespace. For example below
-does not work:
+anything. Currently, this does not work, as we don't have `UiCore` in the `global` namespace. For instance, the code
+below does not work:
 
 ```typescript
 // example/application/moduleWithType.ts
@@ -280,8 +280,8 @@ const showNotificationWithButton = (
 
 (TS2503: Cannot find namespace 'UiCore')
 
-Obviously, we are going to add the namespace in the `global` scope. Unfortunatelly we can't just use the namespace we
-created earlier, we neeed to define a new one. But, instead of importing everything again, we can use our existing
+Obviously, we are going to add the namespace in the `global` scope. Unfortunately, we can't just use the namespace we
+created earlier, we need to define a new one. But, instead of importing everything again, we can use our existing
 namespace to clone data in form of types:
 
 ```typescript
@@ -303,7 +303,7 @@ declare global {
 }
 ```
 
-(we create types from th existing namespace using the type alias syntax)
+(we create types from the existing namespace using the type alias syntax)
 
 We first rename the `UiCore` import as we want to avoid name conflict. Then we re-export `UiCore` under the
 correct name as it was done previously. Finally, we copy the `UiCore` namespace items under the global scope. Both
@@ -337,9 +337,10 @@ support new `import type { UiCore } from "ui-types-package"` syntax last Typescr
 
 In this article, I tried to show how we can create a package with type definitions. Taking into account thousands of
 examples for existing Javascript libraries, my research covers some rare edge case, when the package should behave
-the same way as a global type and while importing some value. The idea is to have two namespaces, first namespace
-contains all available objects, and the second namespace for types as part of the global scope.
+the same way as a global type and while importing some value. The idea is to have two namespaces, the first namespace
+contains all available objects and the second namespace for types as part of the global scope.
 
 The name `UiCore`, the package `ui-types-package` and all objects in the article are placeholders to show the
-approach. You can use whatever names you want for your own libraries and follow the idea described here.
+approach. You can use whatever names you want for your libraries and follow the idea described here.
+
 Complete code example is located [here](https://github.com/n0th1ng-else/typescript-types-complex-example).

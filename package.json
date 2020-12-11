@@ -1,7 +1,7 @@
 {
-  "name": "typescript-types-example",
-  "description": "TypeScript Types example",
-  "version": "0.0.0",
+  "name": "ui-types-package",
+  "description": "type declarations example",
+  "version": "1.0.0",
   "author": "Sergey Nikitin <srg.post@gmail.com>",
   "files": [
     "dist",
