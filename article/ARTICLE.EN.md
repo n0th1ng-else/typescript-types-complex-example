@@ -1,4 +1,4 @@
-### Types For A JS Library. Hard Way
+### More Than Just Types For A JS Library
 
 The first public version of Typescript appeared more than 8 years ago and now it slowly becomes a standard in Javascript
 development. Here in 2021, you can find out more and more companies select Typescript to develop new applications

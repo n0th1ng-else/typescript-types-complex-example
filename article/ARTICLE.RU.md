@@ -1,14 +1,13 @@
-// TODO
+### Больше, Чем Просто Типизация JS Библиотек
 
-### Types For A JS Library. Hard Way
+Первая публичная версия Typescript увидела свет больше 8 лет назад. За это время язык повзрослел и медленно, но верно
+становится стандартом Javascript разработки. Сейчас, в 2021 году, всё больше компаний выбирают Typescript для
+разработки новых приложений как для браузера, так и NodeJS сервисов. Конечно, всегде есть плюсы и минусы такого решения.
+Один из минусов заключается в том, что многие NPM библиотеки написаны на Javascript. Таким образом, статический анализ
+не может вывести типы для таких библиотек и все преимущества типизированного кода сходят на нет. К счастью, у Typescript
+есть способ решение таких проблем, который позволил ему заработать популярность с самого начала.
 
-The first public version of Typescript appeared 8 years ago and now it slowly becomes a standard in Javascript
-development. Here in 2021, you can find out more and more companies select Typescript to develop new applications
-and services. There are always pros and cons to this decision. One disadvantage is that many npm packages are still
-Javascript modules and thus, Typescript can't help you to write safe code. Fortunately, Typescript supports one feature
-that made it so popular in the beginning.
-
-### Type Definitions
+### Объявление типов
 
 You can describe all data that are being exported by a particular Javascript module. The Typescript analyzer will pick
 it up and will handle the package in a way you defined in the types file. The approach is close to C/C++ declaration
