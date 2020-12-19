@@ -2,16 +2,17 @@
 
 Первая публичная версия Typescript увидела свет больше 8 лет назад. За это время язык повзрослел и медленно, но верно
 становится стандартом Javascript разработки. Сейчас, в 2021 году, всё больше компаний выбирают Typescript для
-разработки новых приложений как для браузера, так и NodeJS сервисов. Конечно, всегде есть плюсы и минусы такого решения.
+разработки новых приложений как для браузера, так и NodeJS сервисов. Конечно, в любом подходе всегда есть плюсы и минусы.
 Один из минусов заключается в том, что многие NPM библиотеки написаны на Javascript. Таким образом, статический анализ
 не может вывести типы для таких библиотек и все преимущества типизированного кода сходят на нет. К счастью, у Typescript
-есть способ решение таких проблем, который позволил ему заработать популярность с самого начала.
+есть способ решения таких проблем, который позволил ему заработать популярность с самого начала.
 
 ### Объявление типов
 
-You can describe all data that are being exported by a particular Javascript module. The Typescript analyzer will pick
-it up and will handle the package in a way you defined in the types file. The approach is close to C/C++ declaration
-files. Here is a simple example, imagine you have a trivial JS module:
+Для любого JS модуля мы всегда можем создать d.ts файл, в котором легко описать интерфейс данного модуля. Typescript
+анализатор будет использовать объявленные типы данных из d.ts модуля каждый раз, когда мы делаем импорт соответствующего
+JS модуля. Такой подход очень напоминает заголовочные файлы в Си и позволяет легко наполнить проект контекстом в период
+миграции на Typescript. На практике это выглядит достаточно тривиально, и пример ниже показывает суть подхода:
 
 ```javascript
 // sample.js
@@ -23,7 +24,9 @@ export const getOffset = (page, pageSize) => page * pageSize;
 
 (yes, it is a pretty straightforward `sample.js` module)
 
-Then we can spend a few seconds to write type definitions for the module:
+Мы можем сделать импорт `sample.js` в нашем Typescript модуле. Но ни авто дополнение, ни вывод типов — ничего этого
+работать не будет. Для того, чтобы описать, какой экспорт представляем наш JS модуль, мы пользуемся соглашением и
+создаем файл с объявлением типов:
 
 ```typescript
 // sample.d.ts
@@ -35,36 +38,37 @@ export const getOffset: (page: number, pageSize: number) => number;
 
 (standard way to declare types for Typescript is it create `.d.ts` module)
 
-Note that Typescript operates definitions file over the Javascript module. Imagine you removed
-`export const pageSizes = [25, 50, 100]` from the `sample.js` module. Typescript would still think it exists, and you
-will get a runtime error in the browser. It is a known tradeoff to keep definition files in sync with real Javascript
-code. Teams try to update type definitions as soon as possible to provide a smooth experience for other developers.
-In the meantime, this approach allowed the Typescript code base to raise gradually without having to rewrite all
-Javascript.
+Важный момент - как мы убедились, Typescript оперируем объявлениями типов для JS модулей. Таким образом, если мы удалим
+`export const pageSizes = [25, 50, 100]` из файла `sample.js`, это никак не повлияет на анализатор кода. В результате
+мы получим ошибку уже в процессе выполнения скрипта. Получается, что разработчики должны следить за этим и держать
+файлы с объявлениями типов синхронизованными с исходным кодом модуля. С другой стороны, данный подход позволяет
+пользоваться всеми преимуществами статического анализа без необходимости переписывать весь Javascript код приложения.
 
-There are many examples of how to write type definitions. Most of the time you will meet simple cases and thus would be
-able to find something similar in the repository called
-[DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped), where developers store definitions for npm
-packages. You can also learn more about the type definitions feature in the
-[official documentation](https://www.typescriptlang.org/docs/handbook/2/type-declarations.html) as it is not a part of
-this article.
+В интернете можно найти множество примеров типизации JS модулей. В большинстве случаев вы не будете испытывать проблем
+с объявлением типов и найдете пример среди тысячи d.ts файлов в репозитории
+[DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped). Это репозиторий, который используют разработчики,
+чтобы публиковать объявления типов для NPM библиотек. Вы также всегда можете прочитать
+[официальную документацию](https://www.typescriptlang.org/docs/handbook/2/type-declarations.html), я не буду заострять
+внимание на этом.
 
-### The Thing
+### Суть
 
-In our company, we develop an internal UI components library. We use it in our products from the beginning. You can
-imagine how much effort it would take to rewrite such a big thing. In the meantime, we write new features using the
-Typescript language. The problem is, every time one team goes to implement a new code, they write a small part of the
-UI library definitions. Well, this does not look like a good process, and we decided to have a separate package with
-whole type definitions for our UI components. This would allow us to install it as a typical node package when it is
-needed, and we would not spend time writing the same things again and again. Though we have some good documentation
-resources for the library, having type definitions makes it easier to write the code and refactor when something
-changes in UI components API.
+Во всех наших продуктах мы используем библиотеку UI компонентов, написанную внутри компании. Она отметила уже 12 версию
+и с нами с самого начала. Есть план мигрировать на веб-компоненты, но пока мы в самом начале пути. С другой стороны,
+мы используем Typescript в новых приложениях. Проблема в том, что когда команда начинает писать очередной функционал,
+им приходится восстанавливать часть объявлений типов из возможностей UI библиотеки. Так мы пришли к тому, чтобы создать
+отдельный NPM пакет и описать все возможности UI библиотеки в нем. Таким образом, мы будем подключать этот пакет при
+инициализации нового репозитория, перестанем дублировать код и, таким образом, сэкономим немного времени на разработку.
+Дополнительно объявления типов будут выступать в качестве дополнительной документации к UI компонентам и позволили бы
+с легкостью переходить на очередную версию библиотеки.
 
-### The Problem
+### Проблема
 
-Now you may ask me, what is wrong with our UI library? The thing is that we inject some global variable to interact
-with the exposed API. In the meantime, we want to import some constant pre-defined values to use them in our products.
-For example, we can style a button with one of the types:
+Можно спросить, что же тут особенного? Проблема в том, что мы добавляем на страницу глобальный объект для того, чтобы
+использовать функционал UI библиотеки. То есть, она доступна глобально. В то же время, у нас есть наборы константных
+значений (например для акцента кнопок, для цвета тегов или для типа клетки в таблице), которые мы используем в наших
+приложениях. Обычно это набор заданных значений, используя который мы можем стилизовать тот или иной компонент.
+Например, мы можем отрисовать один из несколько типов кнопок:
 
 ```typescript
 // lists/button.ts
@@ -76,22 +80,25 @@ export enum ButtonType {
 }
 ```
 
-(depending on the value, the button will be rendered in a specific color palette)
+(цвет, размер и шрифт кнопки зависит от значения, которое мы передали)
 
-So this project becomes not just type definitions for the UI library, but a real package! And this is interesting -
-how can we combine the best of two worlds? Let's write down what we want to achieve in the end:
+Выходит, что результатом работы должен стать не просто файл с объявлением типов всех сущностей UI библиотеки, но
+по-настоящему целый пакет, который бы полностью отображать состояние библиотеки на данный момент. Объединяя все
+сказанное выше, наша цель состояла из трех пунктов:
 
-1. We want the global variable `ui` to be accessible without having to import anything.
-2. We want our UI components definitions to be available without having to import anything.
-3. We want to use predefined constants and objects for UI components by importing them from our types package. There
-   should not be any conflict to assign some type from the library in this case as well.
+1. Глобальный объект `ui` должен быть доступен всегда без необходимости объявлять импорт библиотеки.
+2. Все типы из библиотеки должны быть доступны всегда без необходимости объявлять импорт библиотеки.
+3. Мы также хотим иметь возможность объявить импорт для констант и пред-заданных значений из UI библиотеки (не хранятся
+   внутри глобальной переменной `ui`). В этом случае не должно быть никаких конфликтов с пунктами 1 и 2.
 
-Sounds like a small deal, right? Let's write some `.d.ts` file with definitions and... Oh, wait, you can't put real
-code (constants, enumerable lists, and other stuff) in the `.d.ts` file! Sounds reasonable. Let's create a regular
-`.ts` file and put all these enums there. Then we... well, how can we apply globals in the `.ts` file?! Meh...
+Кажется, что это несложно, ведь так? Мы просто создаем `d.ts` модуль, прописываем все объявления типов для нашей
+библиотеки и... так, ок, мы не можем объявлять реальные код (константы, объекты и т.п.) внутри `d.ts` файлов. Ок, не
+страшно. Тогда мы создадим реальный Typescript модуль и положим все этим списки и интерфейсы туда. Затем, мы...
+как мы тогда объявим нашу глобальную переменную? Хм...
 
-We **did not find** an example on how to do that, really. StackOverflow is flooded by the `.d.ts vs .ts` concept war. We
-had nothing but digging into Typescript documentation and finally got the code that meets our requirements.
+Я не смог найти подходящий пример для такого случая, как не пытался. StackOverflow переполнен вопросами относительно
+концепта `.d.ts против .ts`, и ничего похожего на задачу, которую я решаю, найти не удалось. Всё что мне оставалось, это
+пойти читать официальную документацию и пробовать разные варианты. Вот что получилось в результате.
 
 ### Start From The Scratch
 
