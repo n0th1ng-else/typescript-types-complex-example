@@ -211,11 +211,11 @@ import { UiCore } from "ui-types-package";
 
 const showNotification = (message: string): void =>
   ui.notification.info(message, [
-    { text: "OK", type: UiCore.ButtonType.Primary }
+    { text: "OK", type: UiCore.ButtonType.Danger }
   ]);
 ```
 
-(we want to show notifications with the only button OK of Primary type)
+(we want to show notifications with the only button OK of Danger type)
 
 Note here and below **UiCore** is a namespace that contains all the enums, configs, interfaces our UI library operates
 with. I believe it is a good idea to collect everything under some namespace, so you would not think of names for each
