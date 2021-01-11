@@ -227,14 +227,15 @@ const showNotification = (message: string): void =>
 
 (мы хотим показать модальное окно с большой красной кнопкой)
 
-Note here and below **UiCore** is a namespace that contains all the enums, configs, interfaces our UI library operates
-with. I believe it is a good idea to collect everything under some namespace, so you would not think of names for each
-interface. For instance, we have a `Notification` interface. It sounds quite abstract, and it takes a while to
-understand we exact object behind the naming. In the meantime `UiCore.Notification` clearly describes where it comes
-from. Having a namespace is just an optional but convenient way to handle such things.
+Отмечу, что здесь **UiCore** по факту является неймспейсом для всех констант, интерфейсов, списков - то есть для
+всех сущностей, которые содержит и поддерживает наша UI библиотека. Таким образом, нам не нужно думать о том, как
+назвать тот или иной интерфейс. `Notification` звучит очень абстрактно, и нужен префикс, чтобы понять, кому принадлежит
+тот или иной объект. С другой стороны `UiCore.Notification` дает полное понимание принадлежности к библиотеке
+компонентов. Создавать неймспейс необязательно, я нашел этот подход удобным для того, чтобы сгруппировать все вещи
+в одно пространство имён.
 
-Right now we can't import `UiCore` from the library as we don't export anything. Let's improve our code and
-form the namespace:
+На данный момент мы не может сделать импорт для `UiCore` из нашего пакета с типами. У нас просто нет экспорта. Исправим
+этот момент. Для начала объявим неймспейс:
 
 ```typescript
 // namespaces/core.ts
@@ -266,13 +267,15 @@ declare global {
 }
 ```
 
-(we export UiCore and now it is available outside)
+(мы делаем экспорт UiCore и теперь он доступен для импорта в других проектах)
 
-Two simple steps to achieve our goal! Now we can import some enum and enjoy writing the code. OR. Or we can think of
-some other use case. In the example above, we used the `ButtonType.Primary` value to create a notification with some
-pre-defined button. But what if we want to use `ButtonType` as a parameter type?
+Два простых шага позволили нам добиться необходимого результата! Теперь мы можем сделать импорт UiCore в нашем коде
+и использовать все возможности UI компонентов нашей библиотеки. Или можем придумать варианты использования, которые не
+покрыты нашей реализаций. Например, в нашем примере мы использовали значение `ButtonType.Danger`, чтобы создать
+уведомление с кнопкой, окрашенной в красный цвет. Что, если мы захотим использовать `ButtonType` как тип параметра
+для очередной функции? Мы можем сделать импорт UiCore. Но зачем?
 
-### Make Types Great Again
+### Закрываем Краевые Случаи
 
 We are not going to use some particular value, so we expect to access `UiCore.ButtonType` without having to import
 anything. Currently, this does not work, as we don't have `UiCore` in the `global` namespace. For instance, the code
@@ -343,7 +346,7 @@ related type to define other variables and functions without having to import `U
 import it and use types the same way we did before along with enum values and other constants. And for sure we do
 support new `import type { UiCore } from "ui-types-package"` syntax last Typescript versions provide to define types.
 
-### Conclusion
+### В Заключении
 
 In this article, I tried to show how we can create a package with type definitions. Taking into account thousands of
 examples for existing Javascript libraries, my research covers some rare edge case, when the package should behave

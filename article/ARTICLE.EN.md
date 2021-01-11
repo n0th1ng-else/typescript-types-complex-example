@@ -259,7 +259,7 @@ declare global {
 (we export UiCore and now it is available outside)
 
 Two simple steps to achieve our goal! Now we can import some enum and enjoy writing the code. OR. Or we can think of
-some other use case. In the example above, we used the `ButtonType.Primary` value to create a notification with some
+some other use case. In the example above, we used the `ButtonType.Danger` value to create a notification with some
 pre-defined button. But what if we want to use `ButtonType` as a parameter type?
 
 ### Make Types Great Again
