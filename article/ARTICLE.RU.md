@@ -100,11 +100,13 @@ export enum ButtonType {
 концепта `.d.ts против .ts`, и ничего похожего на задачу, которую я решаю, найти не удалось. Всё что мне оставалось, это
 пойти читать официальную документацию и пробовать разные варианты. Вот что получилось в результате.
 
-### Start From The Scratch
+### Начнем с нуля
 
-First things first. We write interfaces and enums as usual. I am going to provide code examples in a simplified matter,
-so we would focus on the approach, not the particular code features. Imagine we have a notification dialog, so we
-write code like this:
+Итак, у нас ничего нет. Начнем с того, чтобы напишем интерфейсы и списки значений для нашей библиотеки, как мы это
+делаем всегда. Здесь и ниже я буду приводить примеры в упрощенном виде, так как в этой статье я делаю акцент на подходе
+к объявлению типов, а не на конкретной реализации интерфейсов или enum-списков. Итак, представим, что наша библиотека
+содержит компонент нотификации - это простое модельное окно с текстом и, может быть, кнопками. В таком случае, один из
+вариантов описания такого окна может выглядеть следующим образом:
 
 ```typescript
 // interfaces/notification.ts
@@ -123,9 +125,9 @@ export interface Notification {
 }
 ```
 
-(simple notification API allows to assign a text message and buttons)
+(Мы описали объект с методами вызовы разных видов нотификаций, состоящих из текста и кнопок)
 
-Where `ButtonType` is the values in the enum (we saw it before):
+Мы используем enum-список `ButtonType`, который уже объявляли раньше:
 
 ```typescript
 // lists/button.ts
@@ -137,10 +139,10 @@ export enum ButtonType {
 }
 ```
 
-(we highlight a button according to the type)
+(мы подсвечиваем кнопку в определенном стиле в зависимости от типа)
 
-Then we let's take a look at the simple case. We don't import anything, as the UI components expose the global
-variable, and we want to call a notification:
+Теперь давайте рассмотрим самый простой случай. Наша UI библиотека предоставляет API для работы с компонентами. Значит,
+у нас должен быть доступ к глобальному объекту библиотеки без необходимости делать импорт чего-либо:
 
 ```typescript
 // example/application/moduleNoImport.ts
@@ -148,9 +150,9 @@ variable, and we want to call a notification:
 ui.notification.info("Document has been saved!");
 ```
 
-(we call a global API for notification dialog without custom button configuration)
+(мы вызываем модальное окно с текстом, `ui` здесь просто глобальный объект)
 
-What do we need to do to make it available? We are going to enrich the **global** namespace with the `ui` variable:
+Как мы можем сделать объект `ui` доступным? Мы объявляем наш объект в глобальной области видимости:
 
 ```typescript
 // index.ts
@@ -162,10 +164,10 @@ declare global {
 }
 ```
 
-(we simply add a new variable into the global namespace)
+(мы объявили новый глобальный объект)
 
-`UiLib` here describes everything our UI library exposes into the global scope. In our example, we have a list of
-methods that show different kinds of notifications:
+Интерфейс `UiLib` здесь содержит описания для всего API, которое поддерживает наша UI библиотека. В нашем упрощенном
+случае, здесь объявлены методы для отображения нотификаций на странице:
 
 ```typescript
 // interfaces/ui.ts
@@ -177,10 +179,11 @@ export interface UiLib {
 }
 ```
 
-(all the notifications API is collected under the Notification interface)
+(разные типы уведомлений собраны в интерфейсе Notification, как мы могли увидеть выше)
 
-This's almost it. As the last thing, we adjust the package configuration. We tell Typescript to emit type declarations
-by tweaking the `tsconfig.json`:
+И на этом можно закончить со случаем, который мы рассматриваем. Остается только настроить наш только что приготовленный
+NPM пакет. Мы попросим Typescript разнести код и объявления типов в разные директории, а также явно укажем сохранять
+объявления типов при компиляции в Javascript. Часть нашего `tsconfig.json` будет выглядеть следубщим образом:
 
 ```json
 {
@@ -192,9 +195,7 @@ by tweaking the `tsconfig.json`:
 }
 ```
 
-(always emit declaration files)
-
-We now control how Typescript emits the output. We also specify a path to our types in `package.json`:
+Последним шагом мы укажем правильные пути в нашем `package.json`:
 
 ```json
 {
@@ -203,14 +204,15 @@ We now control how Typescript emits the output. We also specify a path to our ty
 }
 ```
 
-(don't forget to have a build step for your package to compile Typescript files)
+(не забудьте добавить компиляцию из Typescript при публикации пакета)
 
-Alright then we install the package in our project, and we can see it works!
+Теперь точно все. Мы можем установить новый пакет в очередном репозитории, указать в `tsconfig.json` путь для
+объявлений типов (так как наш npm пакет не попадем в директорию `@types`) и увидеть как всё работает!
 
-### What About Values?
+### А как же пользоваться значениями?
 
-Now let's go deeper. What if we want to create a notification with some specific button? We want to be able to write
-something similar to this example:
+Усложним задачу. У нас есть enum-список ButtonType и мы хотим им воспользоваться. Для этого нам нужно сделать импорт
+значения, например вот так:
 
 ```typescript
 // example/application/moduleWithImport.ts
@@ -219,11 +221,11 @@ import { UiCore } from "ui-types-package";
 
 const showNotification = (message: string): void =>
   ui.notification.info(message, [
-    { text: "OK", type: UiCore.ButtonType.Primary }
+    { text: "OK", type: UiCore.ButtonType.Danger }
   ]);
 ```
 
-(we want to show notifications with the only button OK of Primary type)
+(мы хотим показать модальное окно с большой красной кнопкой)
 
 Note here and below **UiCore** is a namespace that contains all the enums, configs, interfaces our UI library operates
 with. I believe it is a good idea to collect everything under some namespace, so you would not think of names for each
