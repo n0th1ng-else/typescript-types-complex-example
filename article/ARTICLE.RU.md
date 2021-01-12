@@ -277,9 +277,9 @@ declare global {
 
 ### Закрываем Краевые Случаи
 
-We are not going to use some particular value, so we expect to access `UiCore.ButtonType` without having to import
-anything. Currently, this does not work, as we don't have `UiCore` in the `global` namespace. For instance, the code
-below does not work:
+Мы не собираемся пользоваться каким-то определенным значение и будем использовать `UiCore.ButtonType` для объявления
+типа параметров. Значит нет смысла объявлять импорт для `UiCore`. На данный момент такой способ не будет работать,
+так как мы не добавили `UiCore` в глобальную область видимости. Например, мы не сможем написать такой метод:
 
 ```typescript
 // example/application/moduleWithType.ts
@@ -293,9 +293,11 @@ const showNotificationWithButton = (
 
 (TS2503: Cannot find namespace 'UiCore')
 
-Obviously, we are going to add the namespace in the `global` scope. Unfortunately, we can't just use the namespace we
-created earlier, we need to define a new one. But, instead of importing everything again, we can use our existing
-namespace to clone data in form of types:
+Нам нужно объявить `UiCore` глобально. И здесь мы приходим к истории о том, что нельзя просто так взять существующий
+неймспейс и сделать ре-экспорт в глобальной области видимости. Трюк заключается в том, что придется создать новый
+неймспейс с таким же именем (в нашем случае `UiCore`) и объявить все объекты, которые мы собрали в одном месте, второй
+раз. Хорошая новость в том, что необязательно собирать каждый интерфейс из отдельного модуля. Можно просто вывести
+наш глобальный неймспейс из существующего:
 
 ```typescript
 // index.ts
@@ -318,42 +320,45 @@ declare global {
 
 (we create types from the existing namespace using the type alias syntax)
 
-We first rename the `UiCore` import as we want to avoid name conflict. Then we re-export `UiCore` under the
-correct name as it was done previously. Finally, we copy the `UiCore` namespace items under the global scope. Both
-namespaces (`UiCore` and global `UiCore`) export the same data. The only thing I want to draw your attention to is the
-way how we write export statements:
+Первым шагом мы переименуем импорт `UiCore` для того, чтобы избежать конфликта имён. Далее мы поправим имя в экспорте
+для того, чтобы всё осталось на своих местах. Наконец, мы создаем новый неймспейс в глобальной области видимости и
+создаем псевдонимы типов для каждой сущности. Может показаться, что мы дублируем код. Отчасти это так, но на самом деле
+мы получаем разные объекты:
 
 ```typescript
-// UiCore under the global scope
+// UiCore в глобальной области видимости
 export type ButtonType = buttonLists.ButtonType;
 
-// UiCore that can be used as a value
+// UiCore, содержит ссылки на реальные значения
 export import ButtonType = lButton.ButtonType;
 ```
 
-(different syntax for different cases)
+(синтаксис отличается для каждого случая)
 
-You can see the global namespace uses
-[type alias](https://www.typescriptlang.org/docs/handbook/advanced-types.html#type-aliases) syntax to define objects.
-For import, we actually want to have values accessible, so we can't use the same approach there. Instead, we import
-values and re-export them under the namespace using the composite `export import` operator. Thus, we collect all the
-constants, models, enums, interfaces under some common name, we can name it whatever we want, and it will be a single
-entry point for all our UI library-related data.
+Неймспейс в глобальной области видимости использует синтаксис
+[псевдонима типа](https://www.typescriptlang.org/docs/handbook/advanced-types.html#type-aliases).
+Такой подход не работает, когда нам нужно использовать реальное значение переменной. Вместо этого, мы делаем экспорт
+объектов в нашем реальном неймспейсе с помощью композитного оператора `export import`. Таким образом, мы собираем все
+интерфейсы, константы, типы данных под одним именем. Всё API нашей Javascript собрано в одном месте и опыт использования
+не зависит от того, объявит разработчик импорт или нет.
 
-This part is a tradeoff to have all usage cases working. it adds some copy-paste routine, but then it is a comfortable
-way to supply developers with type definitions: We can use global variable exposed by the UI library, we can use any
-related type to define other variables and functions without having to import `UiCore` for no reason. Then we can
-import it and use types the same way we did before along with enum values and other constants. And for sure we do
-support new `import type { UiCore } from "ui-types-package"` syntax last Typescript versions provide to define types.
+Такой трюк заставляет следить за тем, чтобы объявить очередной объект в двух местах. С другой стороны, это позволяет
+покрыть все возможные варианты использования библиотеки типов в проекте. В результате разработчики получают готовые
+объявления типа для UI компонентов и могут использовать API, как и в Javascript модулях без необходимости импорта
+`UiCore`. Также отпадает необходимости создавать одни и те же константы снова и снова. Теперь все они собраны в одном
+месте. Если вам нужна красная кнопка — вы объявляете импорт и присваиваете нужное значение. При этом остальной код
+продолжает работать как обычно.
+Мы создавали объявления типов на Typescript 3. В 4 версии появился специальный синтаксис, который работает похожим
+способом и не противоречит нашей реализации. Вы можете написать `import type { UiCore } from "ui-types-package"` и
+всё будет работать, как раньше.
 
 ### В Заключении
 
-In this article, I tried to show how we can create a package with type definitions. Taking into account thousands of
-examples for existing Javascript libraries, my research covers some rare edge case, when the package should behave
-the same way as a global type and while importing some value. The idea is to have two namespaces, the first namespace
-contains all available objects and the second namespace for types as part of the global scope.
+Вы можете найти тысячи примеров того, как создавать объявления типов для вашей Javascript библиотеки. Я постарался
+рассказать редкий случай, когда необходимо создать не только объявления типов, но также реальные значения полей,
+с которыми может работать API библиотеки. Неважно, используете вы глобальный объект или объявляете импорт для нужной
+переменной - опыт работы с таки пакетом не изменится. Идея заключается в том, чтобы создать два похожих неймспейса:
+неймспейс для экспорта, содержащий реальные переменные и данные, и глобальную копию с помощью оператора создания
+псевдонима типов. Имена, указанные в статье, легко заменить на то, что нужно вам.
 
-The name `UiCore`, the package `ui-types-package` and all objects in the article are placeholders to show the
-approach. You can use whatever names you want for your libraries and follow the idea described here.
-
-Complete code example is located [here](https://github.com/n0th1ng-else/typescript-types-complex-example).
+Полный код примеров можно найти [здесь](https://github.com/n0th1ng-else/typescript-types-complex-example).
