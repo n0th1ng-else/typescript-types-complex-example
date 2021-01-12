@@ -275,7 +275,9 @@ const showNotificationWithButton = (
   buttonText: string,
   buttonType: UiCore.ButtonType
 ): void =>
-  ui.notification.info("test", [{ text: buttonText, type: buttonType }]);
+  ui.notification.info("hello world!", [
+    { text: buttonText, type: buttonType }
+  ]);
 ```
 
 (TS2503: Cannot find namespace 'UiCore')
