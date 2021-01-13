@@ -32,7 +32,7 @@ export const pageSizes: number[];
 export const getOffset: (page: number, pageSize: number) => number;
 ```
 
-(standard way to declare types for Typescript is it create `.d.ts` module)
+(standard way to declare types for Typescript is to create an appropriate `.d.ts` module)
 
 Note that Typescript operates definitions file over the Javascript module. Imagine you removed
 `export const pageSizes = [25, 50, 100]` from the `sample.js` module. Typescript would still think it exists, and you
