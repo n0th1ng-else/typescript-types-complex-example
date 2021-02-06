@@ -1,16 +1,20 @@
 ### More Than Just Types For A JS Library
 
-The first public version of Typescript appeared more than 8 years ago and now it slowly becomes a standard in Javascript
-development. Here in 2021, you can find out more and more companies select Typescript to develop new applications
-and services. There are always pros and cons to this decision. One disadvantage is that many npm packages are still
-Javascript modules and thus, Typescript can't help you to write safe code. Fortunately, Typescript supports one feature
-that made it so popular in the beginning.
+The first public version of TypeScript appeared more than
+[6 years ago](https://devblogs.microsoft.com/typescript/announcing-typescript-1-0). Since that time it grew up and
+brought many incredible features for developers. Today it slowly becomes a standard in the JavaScript world. Slack,
+AirBnB, Lyft, and many others add TypeScript into their tech stack. Teams use TypeScript for both browser applications
+and NodeJS services. There are always pros and cons to this decision. One disadvantage is that many NPM packages are
+still written as JavaScript modules. We experienced this issue as well when decided to migrate our applications to
+TypeScript. We had to implement type definitions for our internal UI components library. We wanted to get a tool, that
+could serve developers as additional documentation. We also wanted to collect everything one can use while working with
+the JS library, in one place. I am going to tell you what steps did we take to achieve the desired solution.
 
-### Type Definitions
+### Type definitions
 
-You can describe all data that are being exported by a particular Javascript module. The Typescript analyzer will pick
-it up and will handle the package in a way you defined in the types file. The approach is close to C/C++ declaration
-files. Here is a simple example, imagine you have a trivial JS module:
+You can describe all data that are being exported by a particular JavaScript module. The TypeScript analyzer will pick
+it up and will handle the package in a way you defined it in the type definitions file. The approach is close to C/C++
+declaration files. Here is a simple example, imagine you have a trivial JS module:
 
 ```javascript
 // sample.js
@@ -20,9 +24,11 @@ export const pageSizes = [25, 50, 100];
 export const getOffset = (page, pageSize) => page * pageSize;
 ```
 
-(yes, it is a pretty straightforward `sample.js` module)
+(one simple `sample.js` module might look like this)
 
-Then we can spend a few seconds to write type definitions for the module:
+You can use the `sample.js` module in TypeScript code without any problems. But guess what? The analyzer would not be
+able to run autocomplete and infer types properly. If we want to rely on help from smart tools, we need to describe the
+API our JS module provides manually. Usually, it is pretty straightforward to do:
 
 ```typescript
 // sample.d.ts
@@ -32,37 +38,42 @@ export const pageSizes: number[];
 export const getOffset: (page: number, pageSize: number) => number;
 ```
 
-(standard way to declare types for Typescript is to create an appropriate `.d.ts` module)
+(standard way to declare types for TypeScript is to create an appropriate `.d.ts` module)
 
-Note that Typescript operates definitions file over the Javascript module. Imagine you removed
-`export const pageSizes = [25, 50, 100]` from the `sample.js` module. Typescript would still think it exists, and you
-will get a runtime error in the browser. It is a known tradeoff to keep definition files in sync with real Javascript
-code. Teams try to update type definitions as soon as possible to provide a smooth experience for other developers.
-In the meantime, this approach allowed the Typescript code base to raise gradually without having to rewrite all
-Javascript.
+Note that definition files have priority over the JavaScript modules. Imagine you removed
+`export const pageSizes = [25, 50, 100]` from the `sample.js` module. TypeScript would still think it exists, and you
+will get a runtime error. It is a known tradeoff to keep definition files in sync with real JavaScript code. Teams try
+to update type definitions as soon as possible to provide a smooth experience for other developers. In the meantime,
+this approach allowed the TypeScript codebase to raise gradually without having to rewrite all JavaScript ecosystem.
 
 There are many examples of how to write type definitions. Most of the time you will meet simple cases and thus would be
 able to find something similar in the repository called
-[DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped), where developers store definitions for npm
+[DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped), where developers store definitions for NPM
 packages. You can also learn more about the type definitions feature in the
 [official documentation](https://www.typescriptlang.org/docs/handbook/2/type-declarations.html) as it is not a part of
 this article.
 
-### The Thing
+### Our JavaScript library
 
-In our company, we develop an internal UI components library. We use it in our products from the beginning. You can
-imagine how much effort it would take to rewrite such a big thing. In the meantime, we write new features using the
-Typescript language. The problem is, every time one team goes to implement a new code, they write a small part of the
-UI library definitions. Well, this does not look like a good process, and we decided to have a separate package with
-whole type definitions for our UI components. This would allow us to install it as a typical node package when it is
-needed, and we would not spend time writing the same things again and again. Though we have some good documentation
-resources for the library, having type definitions makes it easier to write the code and refactor when something
-changes in UI components API.
+In our company, we develop an internal UI components library. We use it in our products from the beginning, and the
+current production version is 12. You could only imagine how much effort it would take to rewrite such a big thing. In
+the meantime, we write new features using the TypeScript language. The problem is, every time one team goes to implement
+a new code, they write a small copy of the UI library definitions. Well, this does not sound like a good process, and we
+decided to have a separate package with complete type definitions for our UI components. And that's because:
 
-### The Problem
+- We would be able to import this package during the new repository initialization. This will allow controlling the
+  version and simplify the refactoring during the version update.
+- We would stop copy-pasting the same code again and again.
+- Type definitions is a great documentation source. I bet developers would rather select the method via
+  **IntelliSense** suggestions than go to the web page with all API descriptions and copy the method name.
+
+### So what is wrong?
 
 Now you may ask me, what is wrong with our UI library? The thing is that we inject some global variable to interact
-with the exposed API. In the meantime, we want to import some constant pre-defined values to use them in our products.
+with the exposed API. In addition, we want to import some constant pre-defined values (icons, table cell types, tag
+colors, etc) that are being used in our web pages. It usually comes in form of constant identifiers that help to style
+components.
+
 For example, we can style a button with one of the types:
 
 ```typescript
@@ -75,24 +86,25 @@ export enum ButtonType {
 }
 ```
 
-(depending on the value, the button will be rendered in a specific color palette)
+(depending on the value, the button will be rendered in a specific size and color palette)
 
-So this project becomes not just type definitions for the UI library, but a real package! And this is interesting -
-how can we combine the best of two worlds? Let's write down what we want to achieve in the end:
+We came to an idea to store all library-specific values in one place. So this project became not just type definitions
+for the UI library, but a real package! It should represent the exact library state at some specific version. And this
+is interesting - how can we implement this? Let's write down what we want to achieve as the result:
 
 1. We want the global variable `ui` to be accessible without having to import anything.
-2. We want our UI components definitions to be available without having to import anything.
+2. We want our UI components definitions to be available without having to import anything as well.
 3. We want to use predefined constants and objects for UI components by importing them from our types package. There
-   should not be any conflict to assign some type from the library in this case as well.
+   should not be any conflict to assign some type from the library in this case.
 
-Sounds like a small deal, right? Let's write some `.d.ts` file with definitions and... Oh, wait, you can't put real
+Sounds like a small deal, right? Let's write some `.d.ts` file with type definitions and... Oh, wait, you can't put real
 code (constants, enumerable lists, and other stuff) in the `.d.ts` file! Sounds reasonable. Let's create a regular
 `.ts` file and put all these enums there. Then we... well, how can we apply globals in the `.ts` file?! Meh...
 
-We **did not find** an example on how to do that, really. StackOverflow is flooded by the `.d.ts vs .ts` concept war. We
-had nothing but digging into Typescript documentation and finally got the code that meets our requirements.
+We **did not find** an example on how to do that, really. StackOverflow is flooded with the `.d.ts vs .ts` concept war.
+We had nothing but digging into TypeScript documentation and finally got the code that meets our requirements.
 
-### Start From The Scratch
+### Start from the scratch
 
 First things first. We write interfaces and enums as usual. I am going to provide code examples in a simplified matter,
 so we would focus on the approach, not the particular code features. Imagine we have a notification dialog, so we
@@ -171,7 +183,7 @@ export interface UiLib {
 
 (all the notifications API is collected under the Notification interface)
 
-This's almost it. As the last thing, we adjust the package configuration. We tell Typescript to emit type declarations
+This's almost it. As the last thing, we adjust the package configuration. We tell TypeScript to emit type declarations
 by adjusting the `tsconfig.json`:
 
 ```json
@@ -186,7 +198,7 @@ by adjusting the `tsconfig.json`:
 
 (always emit declaration files)
 
-We now control how Typescript emits the output. We also specify a path to our types in `package.json`:
+We now control how TypeScript emits the output. We also specify a path to our types in `package.json`:
 
 ```json
 {
@@ -195,7 +207,7 @@ We now control how Typescript emits the output. We also specify a path to our ty
 }
 ```
 
-(don't forget to have a build step for your package to compile Typescript files)
+(don't forget to have a build step for your package to compile TypeScript files)
 
 Alright then we install the package in our project. Finally, we specify the package path in `tsconfig.json` (since we
 don't use the default `@types` folder) to see that it works!
@@ -335,21 +347,21 @@ This part is a tradeoff to have all usage cases working. it adds some copy-paste
 way to supply developers with type definitions: we can use global variable exposed by the UI library, we can use any
 related type to define other variables and functions without having to import `UiCore` without any reason. Then we can
 import it and use types the same way we did before along with enum values and other constants. And yes, we do
-support new `import type { UiCore } from "ui-types-package"` syntax last Typescript versions provide to define types.
+support new `import type { UiCore } from "ui-types-package"` syntax last TypeScript versions provide to define types.
 
 ### Conclusion
 
 In this article, I tried to show how we can create a package with type definitions. Taking into account thousands of
-examples for existing Javascript libraries, my research covers some rare edge case, when the package should behave
+examples for existing JavaScript libraries, my research covers some rare edge case, when the package should behave
 the same way as a global type and while importing some value. You can achieve the expected results by following these
 steps:
 
-- Create and set up a new NPM package
-- Describe the whole interface supported by the JavaScript library
-- Declare the global object that is being injected into `window`
-- Create a namespace made of objects you have defined already - we will use it for import statements
-- Create a namespace made of types based on the previous namespace. It will be located in the global scope
-- Verify that we assigned the same name for both namespaces
+- Create and set up a new NPM package.
+- Describe the whole interface supported by the JavaScript library.
+- Declare the global object that is being injected into `window`.
+- Create a namespace made of objects you have defined already - we will use it for import statements.
+- Create a namespace made of types based on the previous namespace. It will be located in the global scope.
+- Verify that we assigned the same name for both namespaces.
 
 Таким образом, мы смогли покрыть все варианты работы с библиотекой. При этом нам не нужно будет менять существующий
 TypeScript код, если понадобится сделать импорт.
