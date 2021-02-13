@@ -96,7 +96,7 @@ had nothing but digging into Typescript documentation and finally got the code t
 
 First things first. We write interfaces and enums as usual. I am going to provide code examples in a simplified matter,
 so we would focus on the approach, not the particular code features. Imagine we have a notification dialog, so we
-write code like this:
+write something like this:
 
 ```typescript
 // interfaces/notification.ts
@@ -140,7 +140,7 @@ variable, and we want to call a notification:
 ui.notification.info("Document has been saved!");
 ```
 
-(we call a global API for notification dialog without custom button configuration)
+(we call a global API to show the notification dialog without custom button configuration)
 
 What do we need to do to make it available? We are going to enrich the **global** namespace with the `ui` variable:
 
@@ -172,7 +172,7 @@ export interface UiLib {
 (all the notifications API is collected under the Notification interface)
 
 This's almost it. As the last thing, we adjust the package configuration. We tell Typescript to emit type declarations
-by tweaking the `tsconfig.json`:
+by adjusting the `tsconfig.json`:
 
 ```json
 {
@@ -197,9 +197,10 @@ We now control how Typescript emits the output. We also specify a path to our ty
 
 (don't forget to have a build step for your package to compile Typescript files)
 
-Alright then we install the package in our project, and we can see it works!
+Alright then we install the package in our project. Finally, we specify the package path in `tsconfig.json` (since we
+don't use the default `@types` folder) to see that it works!
 
-### What About Values?
+### Using the values
 
 Now let's go deeper. What if we want to create a notification with some specific button? We want to be able to write
 something similar to this example:
@@ -215,10 +216,10 @@ const showNotification = (message: string): void =>
   ]);
 ```
 
-(we want to show notifications with the only button OK of Danger type)
+(we want to show notifications with the only OK button of Danger type)
 
 Note here and below **UiCore** is a namespace that contains all the enums, configs, interfaces our UI library operates
-with. I believe it is a good idea to collect everything under some namespace, so you would not think of names for each
+with. I think it is a good idea to collect everything under some namespace, so you would not think of names for each
 interface. For instance, we have a `Notification` interface. It sounds quite abstract, and it takes a while to
 understand we exact object behind the naming. In the meantime `UiCore.Notification` clearly describes where it comes
 from. Having a namespace is just an optional but convenient way to handle such things.
@@ -256,17 +257,17 @@ declare global {
 }
 ```
 
-(we export UiCore and now it is available outside)
+(we export UiCore and now it is available from the outside)
 
 Two simple steps to achieve our goal! Now we can import some enum and enjoy writing the code. OR. Or we can think of
 some other use case. In the example above, we used the `ButtonType.Danger` value to create a notification with some
-pre-defined button. But what if we want to use `ButtonType` as a parameter type?
+pre-defined button. What if we want to use `ButtonType` as a parameter type?
 
-### Make Types Great Again
+### Covering edge cases
 
-We are not going to use some particular value, so we expect to access `UiCore.ButtonType` without having to import
-anything. Currently, this does not work, as we don't have `UiCore` in the `global` namespace. For instance, the code
-below does not work:
+We are not going to use some particular value, so we expect to access the type `UiCore.ButtonType` without having to
+import anything. Currently, this does not work, as we don't have `UiCore` in the `global` scope. For instance, the
+code below does not work:
 
 ```typescript
 // example/application/moduleWithType.ts
@@ -283,8 +284,9 @@ const showNotificationWithButton = (
 (TS2503: Cannot find namespace 'UiCore')
 
 Obviously, we are going to add the namespace in the `global` scope. Unfortunately, we can't just use the namespace we
-created earlier, we need to define a new one. But, instead of importing everything again, we can use our existing
-namespace to clone data in form of types:
+created earlier, we need to define a new one. The trick is to create a new namespace with the same name and with almost
+the same data included. Good news: instead of importing everything again, we can use our existing namespace to clone
+data in form of types:
 
 ```typescript
 // index.ts
@@ -320,27 +322,37 @@ export type ButtonType = buttonLists.ButtonType;
 export import ButtonType = lButton.ButtonType;
 ```
 
-(different syntax for different cases)
+(different syntax for each case)
 
 You can see the global namespace uses
 [type alias](https://www.typescriptlang.org/docs/handbook/advanced-types.html#type-aliases) syntax to define objects.
-For import, we actually want to have values accessible, so we can't use the same approach there. Instead, we import
-values and re-export them under the namespace using the composite `export import` operator. Thus, we collect all the
-constants, models, enums, interfaces under some common name, we can name it whatever we want, and it will be a single
-entry point for all our UI library-related data.
+For import statements, we actually want to have values (not types) accessible, so we can't use the same approach there.
+Instead, we import values and re-export them under the namespace using the composite `export import` operator. Thus, we
+collect all the constants, models, enums, interfaces under some common name, we can name it whatever we want, and it
+will be a single entry point for all our UI library-related data.
 
 This part is a tradeoff to have all usage cases working. it adds some copy-paste routine, but then it is a comfortable
-way to supply developers with type definitions: We can use global variable exposed by the UI library, we can use any
-related type to define other variables and functions without having to import `UiCore` for no reason. Then we can
-import it and use types the same way we did before along with enum values and other constants. And for sure we do
+way to supply developers with type definitions: we can use global variable exposed by the UI library, we can use any
+related type to define other variables and functions without having to import `UiCore` without any reason. Then we can
+import it and use types the same way we did before along with enum values and other constants. And yes, we do
 support new `import type { UiCore } from "ui-types-package"` syntax last Typescript versions provide to define types.
 
 ### Conclusion
 
 In this article, I tried to show how we can create a package with type definitions. Taking into account thousands of
 examples for existing Javascript libraries, my research covers some rare edge case, when the package should behave
-the same way as a global type and while importing some value. The idea is to have two namespaces, the first namespace
-contains all available objects and the second namespace for types as part of the global scope.
+the same way as a global type and while importing some value. You can achieve the expected results by following these
+steps:
+
+- Create and set up a new NPM package
+- Describe the whole interface supported by the JavaScript library
+- Declare the global object that is being injected into `window`
+- Create a namespace made of objects you have defined already - we will use it for import statements
+- Create a namespace made of types based on the previous namespace. It will be located in the global scope
+- Verify that we assigned the same name for both namespaces
+
+Таким образом, мы смогли покрыть все варианты работы с библиотекой. При этом нам не нужно будет менять существующий
+TypeScript код, если понадобится сделать импорт.
 
 The name `UiCore`, the package `ui-types-package` and all objects in the article are placeholders to show the
 approach. You can use whatever names you want for your libraries and follow the idea described here.
