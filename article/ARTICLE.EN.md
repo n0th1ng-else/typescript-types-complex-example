@@ -90,7 +90,7 @@ export enum ButtonType {
 
 We came to an idea to store all library-specific values in one place. So this project became not just type definitions
 for the UI library, but a real package! It should represent the exact library state at some specific version. And this
-is interesting - how can we implement this? Let's write down what we want to achieve as the result:
+is interesting - how can we implement this? Let's state what we want to achieve as the result:
 
 1. We want the global variable `ui` to be accessible without having to import anything.
 2. We want our UI components definitions to be available without having to import anything as well.
@@ -183,8 +183,8 @@ export interface UiLib {
 
 (all the notifications API is collected under the Notification interface)
 
-This's almost it. As the last thing, we adjust the package configuration. We tell TypeScript to emit type declarations
-by adjusting the `tsconfig.json`:
+This's almost it. Lastly, we adjust the package configuration. We tell TypeScript to emit type declarations by adjusting
+the `tsconfig.json`:
 
 ```json
 {
@@ -207,9 +207,9 @@ We now control how TypeScript emits the output. We also specify a path to our ty
 }
 ```
 
-(don't forget to have a build step for your package to compile TypeScript files)
+(don't forget to set up a build step for your package to compile TypeScript files)
 
-Alright then we install the package in our project. Finally, we specify the package path in `tsconfig.json` (since we
+Alright, then we install the package in our project. Finally, we specify the package path in `tsconfig.json` (since we
 don't use the default `@types` folder) to see that it works!
 
 ### Using the values
