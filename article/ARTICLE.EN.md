@@ -224,16 +224,16 @@ import { UiCore } from "ui-types-package";
 
 const showNotification = (message: string): void =>
   ui.notification.info(message, [
-    { text: "OK", type: UiCore.ButtonType.Danger }
+    { text: "Failed to read the document", type: UiCore.ButtonType.Danger }
   ]);
 ```
 
-(we want to show notifications with the only OK button of Danger type)
+(we want to show notifications with the button of Danger type)
 
 Note here and below **UiCore** is a namespace that contains all the enums, configs, interfaces our UI library operates
 with. I think it is a good idea to collect everything under some namespace, so you would not think of names for each
 interface. For instance, we have a `Notification` interface. It sounds quite abstract, and it takes a while to
-understand we exact object behind the naming. In the meantime `UiCore.Notification` clearly describes where it comes
+understand the exact object behind the naming. In the meantime `UiCore.Notification` clearly describes where it comes
 from. Having a namespace is just an optional but convenient way to handle such things.
 
 Right now we can't import `UiCore` from the library as we don't export anything. Let's improve our code and
@@ -255,7 +255,7 @@ export namespace UiCore {
 (we use composite export to create an alias for objects under the namespace)
 
 We basically export all data we have under the namespace with `export import` alias syntax. And, since the main package
-module is `index.ts` in the root, we write a global export to expose the namespace into the public:
+module is `index.ts` in the root, we write a global export to expose the namespace to the public:
 
 ```typescript
 // index.ts
@@ -286,7 +286,7 @@ code below does not work:
 
 const showNotificationWithButton = (
   buttonText: string,
-  buttonType: UiCore.ButtonType
+  buttonType: UiCore.ButtonType // <-- TS2503: Cannot find namespace 'UiCore'
 ): void =>
   ui.notification.info("hello world!", [
     { text: buttonText, type: buttonType }
@@ -341,20 +341,22 @@ You can see the global namespace uses
 For import statements, we actually want to have values (not types) accessible, so we can't use the same approach there.
 Instead, we import values and re-export them under the namespace using the composite `export import` operator. Thus, we
 collect all the constants, models, enums, interfaces under some common name, we can name it whatever we want, and it
-will be a single entry point for all our UI library-related data.
+will be a single entry point for all our UI library-related data. As the result, we collected all data in one place, and
+the developer experience does not change from using the global object to having to import something.
 
-This part is a tradeoff to have all usage cases working. it adds some copy-paste routine, but then it is a comfortable
-way to supply developers with type definitions: we can use global variable exposed by the UI library, we can use any
-related type to define other variables and functions without having to import `UiCore` without any reason. Then we can
-import it and use types the same way we did before along with enum values and other constants. And yes, we do
-support new `import type { UiCore } from "ui-types-package"` syntax last TypeScript versions provide to define types.
+This part is a tradeoff to get all usage cases working. It adds some copy-paste routine, but then it is a comfortable
+way to supply developers with type definitions: we can use the global variable exposed by the UI library as we do in
+JavaScript modules — without having to import anything. Then we can import the package and use constant values. All of
+them are defined and ready to use. The existing code will remain the same. And yes, we do support the new
+`import type { UiCore } from "ui-types-package"` syntax which was introduced in TypeScript v3.8 to define types. There
+is no conflict with our implementation.
 
 ### Conclusion
 
-In this article, I tried to show how we can create a package with type definitions. Taking into account thousands of
-examples for existing JavaScript libraries, my research covers some rare edge case, when the package should behave
-the same way as a global type and while importing some value. You can achieve the expected results by following these
-steps:
+You can find thousands of existing type definitions for JavaScript libraries. In this article, I tried to explain some
+specific edge case, when along with type definitions, the package needs to contain real values. We use this approach for
+our UI components library to style table cells, specify icons, and more. You can achieve such capabilities by following
+these steps:
 
 - Create and set up a new NPM package.
 - Describe the whole interface supported by the JavaScript library.
@@ -363,8 +365,8 @@ steps:
 - Create a namespace made of types based on the previous namespace. It will be located in the global scope.
 - Verify that we assigned the same name for both namespaces.
 
-Таким образом, мы смогли покрыть все варианты работы с библиотекой. При этом нам не нужно будет менять существующий
-TypeScript код, если понадобится сделать импорт.
+This small guide makes it possible to cover all potential use cases for any available JS library. In the end, you will
+get a package, that is easy to use, support, and extend.
 
 The name `UiCore`, the package `ui-types-package` and all objects in the article are placeholders to show the
 approach. You can use whatever names you want for your libraries and follow the idea described here.

@@ -234,7 +234,7 @@ import { UiCore } from "ui-types-package";
 
 const showNotification = (message: string): void =>
   ui.notification.info(message, [
-    { text: "OK", type: UiCore.ButtonType.Danger }
+    { text: "Failed to read the document", type: UiCore.ButtonType.Danger }
   ]);
 ```
 
@@ -300,7 +300,7 @@ declare global {
 
 const showNotificationWithButton = (
   buttonText: string,
-  buttonType: UiCore.ButtonType
+  buttonType: UiCore.ButtonType // <-- TS2503: Cannot find namespace 'UiCore'
 ): void =>
   ui.notification.info("hello world!", [
     { text: buttonText, type: buttonType }
@@ -312,8 +312,8 @@ const showNotificationWithButton = (
 Нам нужно объявить `UiCore` глобально. И здесь мы приходим к истории о том, что нельзя просто так взять существующий
 неймспейс и сделать его ре-экспорт в глобальной области видимости. Трюк заключается в том, что придется создать новый
 неймспейс с таким же именем (в нашем случае `UiCore`) и объявить все объекты, которые мы собрали в одном месте, второй
-раз. Хорошая новость: необязательно собирать каждый интерфейс из отдельного модуля. Можно просто вывести наш глобальный
-неймспейс из существующего:
+раз. Хорошая новость: необязательно собирать новый интерфейс из каждого отдельного модуля. Можно просто вывести наш
+глобальный неймспейс из существующего:
 
 ```typescript
 // index.ts

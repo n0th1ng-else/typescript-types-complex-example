@@ -4,7 +4,7 @@ import { UiCore } from "../../dist";
 
 const showNotification = (message: string): void =>
   ui.notification.info(message, [
-    { text: "OK", type: UiCore.ButtonType.Danger }
+    { text: "Failed to read the document", type: UiCore.ButtonType.Danger }
   ]);
 
 const showNotificationWithButton = (
