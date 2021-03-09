@@ -3,7 +3,7 @@
 import { ButtonType } from "../lists/button";
 
 export interface NotificationButtonConfig {
-  text?: string;
+  text: string;
   type?: ButtonType;
 }
 
