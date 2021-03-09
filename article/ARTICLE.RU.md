@@ -1,4 +1,4 @@
-## Больше, Чем Просто Типизация JS Библиотек
+## Типизация JavaScript библиотек, приправленная данными
 
 Первая версия TypeScript увидела свет
 [больше 6 лет назад](https://devblogs.microsoft.com/typescript/announcing-typescript-1-0). За это время язык повзрослел
@@ -125,7 +125,7 @@ export enum ButtonType {
 import { ButtonType } from "../lists/button";
 
 export interface NotificationButtonConfig {
-  text?: string;
+  text: string;
   type?: ButtonType;
 }
 
@@ -234,7 +234,7 @@ import { UiCore } from "ui-types-package";
 
 const showNotification = (message: string): void =>
   ui.notification.info(message, [
-    { text: "Failed to read the document", type: UiCore.ButtonType.Danger }
+    { text: "Sad!", type: UiCore.ButtonType.Danger }
   ]);
 ```
 
