@@ -102,7 +102,7 @@ Sounds like a small deal, right? Let's write some `.d.ts` file with type definit
 code (constants, enumerable lists, and other stuff) in the `.d.ts` file! Sounds reasonable. Let's create a regular
 `.ts` file and put all these enums there. Then we... well, how can we apply globals in the `.ts` file?! Meh...
 
-We did not find an example on how to do that, really. StackOverflow is flooded with the `.d.ts vs .ts` concept war.
+We did not find an example of how to do that, really. StackOverflow is flooded with the `.d.ts vs .ts` concept war.
 We had nothing but digging into TypeScript documentation and finally introduced the code that meets our requirements.
 
 ### Start from the scratch
@@ -210,8 +210,8 @@ We now control how TypeScript emits the output. We also specify a path to our ty
 
 (don't forget to set up a build step for your package to compile TypeScript files)
 
-Alright, then we install the package in our project. Finally, we specify the package path in project's `tsconfig.json`
-(since we don't use the default `@types` folder) to see that it works!
+Alright, then we install the package in our project. Finally, we specify the package path in the project's
+`tsconfig.json` (since we don't use the default `@types` folder) to see that it works!
 
 ### Using the values
 
@@ -338,11 +338,11 @@ export import ButtonType = lButton.ButtonType;
 
 You can see the global namespace uses
 [type alias](https://www.typescriptlang.org/docs/handbook/advanced-types.html#type-aliases) syntax to define objects.
-For import statements, we actually want to have values (not types) accessible, so we can't use the same approach there.
-Instead, we import values and re-export them under the namespace using the composite `export import` operator. Thus, we
-collect all the constants, models, enums, interfaces under some common name, we can name it whatever we want, and it
-will be a single entry point for all our UI library-related data. As the result, we collected all data in one place, and
-the developer experience does not change from using the global object to having to import something.
+For import statements, we want to have values (not types) accessible, so we can't use the same approach there. Instead,
+we import values and re-export them under the namespace using the composite `export import` operator. Thus, we collect
+all the constants, models, enums, interfaces under some common name, we can name it whatever we want, and it will be a
+single entry point for all our UI library-related data. As the result, we collected all data in one place, and the
+developer experience does not change from using the global object to having to import something.
 
 This part is a tradeoff to get all usage cases working. It adds some copy-paste routine, but then it is a comfortable
 way to supply developers with type definitions: we can use the global variable exposed by the UI library as we do in
@@ -368,7 +368,7 @@ following these steps:
 This small guide makes it possible to cover all potential use cases for any available JS library. In the end, you will
 get a package, that is easy to use, support, and extend.
 
-The name `UiCore`, the package `ui-types-package` and all objects in the article are placeholders to show the
+The name `UiCore`, the package `ui-types-package`, and all objects in the article are placeholders to show the
 approach. You can use whatever names you want for your libraries and follow the idea described here.
 
 Complete code example is located [here](https://github.com/n0th1ng-else/typescript-types-complex-example).
