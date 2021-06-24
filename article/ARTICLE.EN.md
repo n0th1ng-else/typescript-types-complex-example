@@ -1,7 +1,7 @@
-### JavaScript Library Type Definitions, Spiced With Data
+## Adapting One Old UI Components Library To Work In TypeScript Code
 
 The first public version of TypeScript appeared more than
-[6 years ago](https://devblogs.microsoft.com/typescript/announcing-typescript-1-0). Since that time it grew up and
+[7 years ago](https://devblogs.microsoft.com/typescript/announcing-typescript-1-0). Since that time it grew up and
 brought many incredible features for developers. Today it slowly becomes a standard in the JavaScript world. Slack,
 AirBnB, Lyft, and many others add TypeScript into their tech stack. Teams use TypeScript for both browser applications
 and NodeJS services. There are always pros and cons to this decision. One disadvantage is that many NPM packages are
@@ -40,7 +40,7 @@ export const getOffset: (page: number, pageSize: number) => number;
 
 (standard way to declare types for TypeScript is to create an appropriate `.d.ts` module)
 
-Note that definition files have priority over the JavaScript modules. Imagine you removed
+Note that definition files have priority over JavaScript modules. Imagine you removed
 `export const pageSizes = [25, 50, 100]` from the `sample.js` module. TypeScript would still think it exists, and you
 will get a runtime error. It is a known tradeoff to keep definition files in sync with real JavaScript code. Teams try
 to update type definitions as soon as possible to provide a smooth experience for other developers. In the meantime,
@@ -72,7 +72,7 @@ decided to have a separate package with complete type definitions for our UI com
 
 Now you may ask me, what is wrong with our library? The thing is that we inject some global variable to interact with
 the exposed API. In addition, we want to import some constant pre-defined values (icons, table cell types, tag colors,
-etc) that can be used by the UI components. They usually come in form of constant identifiers that help to style
+etc.) that can be used by the UI components. They usually come in form of constant identifiers that help to style
 components.
 
 For example, we can style a button with one of the types:
@@ -270,7 +270,7 @@ declare global {
 }
 ```
 
-(we export UiCore and now it is available from the outside)
+(we export UiCore, and now it is available from the outside)
 
 Two simple steps to achieve our goal! Now we can import some enum and enjoy writing the code. OR. Or we can think of
 some other use cases. In the example above, we used the `ButtonType.Danger` value to create a notification with some
