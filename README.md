@@ -3,7 +3,7 @@
 You can read the article:
 
 - [English](https://github.com/n0th1ng-else/typescript-types-complex-example/blob/main/article/ARTICLE.EN.md)
-- [Русский](https://github.com/n0th1ng-else/typescript-types-complex-example/blob/main/article/ARTICLE.RU.md)
+- [Habr.com (На русском)](https://habr.com/ru/post/542184/)
 
 ### Build
 
