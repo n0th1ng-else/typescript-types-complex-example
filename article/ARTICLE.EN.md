@@ -337,7 +337,7 @@ export import ButtonType = lButton.ButtonType;
 (different syntax for each case)
 
 You can see the global namespace uses
-[type alias](https://www.typescriptlang.org/docs/handbook/advanced-types.html#type-aliases) syntax to define objects.
+[type alias](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-aliases) syntax to define objects.
 For import statements, we want to have values (not types) accessible, so we can't use the same approach there. Instead,
 we import values and re-export them under the namespace using the composite `export import` operator. Thus, we collect
 all the constants, models, enums, interfaces under some common name, we can name it whatever we want, and it will be a
